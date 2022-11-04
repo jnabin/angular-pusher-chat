@@ -1,0 +1,44 @@
+<div class="auth-wrapper">
+    <div class="container">
+        <div class="row">
+            <div class="col-xs-6 col-md-4">
+                <form *ngIf="!loading" #authForm="ngForm" (ngSubmit)="submit(authForm)">
+                    <div class="mb-3">
+                      <label for="name" class="form-label">User Name</label>
+                      <input type="text" 
+                             required 
+                             class="form-control" 
+                             name="name" 
+                             id="name"
+                             ngModel>
+                    </div>
+                    <div class="mb-3">
+                      <label for="password" class="form-label">Password</label>
+                      <input type="password" 
+                             required 
+                             name="password" 
+                             class="form-control" 
+                             id="password"
+                             ngModel
+                             name="password"
+                             minlength="1">
+                    </div>
+                    <div>
+                        <button type="submit" 
+                                class="btn btn-primary"
+                                [disabled]="!authForm.valid">
+                            {{isLoginMode ? 'Login' : 'Sign Up'}}          
+                        </button> | 
+                        <button type="button" class="btn btn-primary" (click)="switchMode()">
+                            Switch to {{isLoginMode ? 'Sign Up' : 'Login'}}
+                        </button>
+                    </div>
+                  </form>
+                <loader *ngIf="loading"></loader>
+                <div *ngIf="error.length > 0" class="alert alert-danger">
+                    <p>{{error}}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

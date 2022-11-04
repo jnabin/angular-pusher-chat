@@ -1,0 +1,64 @@
+<div class="user-details mb-3">
+    <strong>User Name : </strong>
+    <span>{{userDetail.name}}</span>
+    <span class="ps-5">Active Users: {{activeCount}}</span>
+</div>
+<div class="position-relative">
+  <div class="sidebar">
+    <app-chat-sidebar *ngFor="let item of users" 
+                      [conversationItem] = "item"
+                      [openUserId]="opponentUserId"
+                      [activeUserIds] = "activeUserIds"
+                      [isActive] = "activeUserIds.includes(item.id.toString())"
+                      (openSessionClick) = "openConversation($event)"
+                      >
+
+    </app-chat-sidebar>
+  </div>
+  <div class="messenger" [hidden]="closeConversation">
+    <div class="body" [ngClass]="{'white-bg': fromConversation}">
+      <div class="message" [ngClass]="{me : message.me}" *ngFor="let message of messages; let i = index">
+        <div class="message-content">
+          <div class="image align-self-center">
+            <span class="user-title">{{message.userName[0]}}</span>
+          </div>
+          <div class="content" [ngClass]="{'gray-content': fromConversation}">
+            {{message.body}}
+            <img *ngIf="message.image" [src]="message.image" alt="" srcset="">
+          </div>
+        </div>
+        <div class="time" [hidden] = "i < conversation.messages.length-1 && message.me == conversation.messages[i+1].me && message.time == conversation.messages[i+1].time">
+          {{message.time}}
+        </div>
+      </div>
+    </div>
+    <div class="footer">
+        <span id="typing-indicator"></span>
+      <input type="file" class="d-none" accept="image/*" #fileInput
+          (change)="fileSelect($event)" />
+      <emoji-mart
+        (emojiClick)="addEmoji($event)"
+        *ngIf="toggleEmojiPicker"
+        class="emoji"
+        itle="Pick your emoji…"
+        emoji="point_up"
+      >
+      </emoji-mart>
+      <div class="inputBox" (click)="toggleEmojiPicker = false">
+        <textarea id="textarea1" (keyup)="publishTyping()" [(ngModel)]="messageContent" (keydown)="triggerFunction($event)"></textarea>
+      </div>
+      <div class="send-option align-self-center">
+        <button class="pl-0">
+          <img (click)="toggleEmojiPicker = !toggleEmojiPicker" src="/assets/images/smile.svg" alt="" srcset="">
+        </button>
+        <button (click)="fileInput.click()">
+          <img (click)="toggleEmojiPicker = false" src="/assets/images/file.svg" alt="" srcset="">
+        </button>
+        <button class="pr-0" (click)="sendMessage()">
+          <img src="/assets/images/send-btn.svg" alt="" srcset="">
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+  

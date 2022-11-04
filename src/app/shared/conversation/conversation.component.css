@@ -1,0 +1,146 @@
+.messenger{
+    display: flex;
+    flex-direction: column;
+    height: 90vh;
+    padding-left: 420px;
+    gap: 20px;
+  }
+
+  .messenger .body{
+    padding: 30px 20px;
+    flex-basis: 657px;
+    gap: 8px;
+    overflow-y: auto;
+    background: #F5F5FA;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .message{
+    display: flex;
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .time{
+    margin: 5px 0px;
+    padding-left: 32px;
+    font-size: 12px;
+    line-height: 18px;
+    color: #8181A5;
+  }
+  .message-content{
+    display: flex;
+    flex-direction: row;
+    gap: 8px;
+  }
+
+  .message-content .user-title{
+    width: 30px;
+    height: 30px;
+    display: inline-block;
+    text-transform: uppercase;
+    border-radius: 50%;
+    color: white;
+    background-color: #5E81F4;
+    line-height: 30px;
+    font-size: 16px;
+    text-align: center;
+  }
+  .content{
+    white-space: pre-line;
+    width: calc(100% - 24px);
+    flex-wrap: 1;
+    padding: 10px 15px;
+    font-size: 14px;
+    line-height: 21px;
+    color: #1C1D21;
+    background-color: white;
+    border-radius: 18.5px 18.5px 18.5px 0px;
+  }
+  .content.gray-content{
+    background-color: #F6F6F6;
+  }
+
+  .content img{
+    max-width: 100px;
+  }
+  .message.me{
+    align-items: flex-end;
+  }
+
+  .message.me .time{
+    padding-right: 32px;
+  }
+
+  .message.me .message-content .image{
+    order: 2;
+  }
+  .message.me .message-content .content{
+    color: white;
+    border-radius: 17px 17px 0px 17px;
+    background: #5E81F4;
+  }
+
+  .messenger .body.white-bg{
+    background-color: white;
+    flex-basis: calc(100vh - 120px);
+  }
+
+  .messenger .footer{
+    position: relative;
+    display: flex;
+    margin: 20px 15px;
+    flex-basis: 74px;
+    background: #F5F5FA;
+    border-radius: 12px;
+    padding: 15px 10px;
+    gap: 5px;
+  }
+
+  #typing-indicator{
+    position: absolute;
+    top: -25px;
+    left: 13px;
+  }
+
+  .messenger .footer textarea{
+    resize: none;
+    height: 100%;
+    width: 100%;
+    border: none;
+    outline: none;
+    background: #F5F5FA;
+    font-size: 14px;
+    line-height: 17px;
+    color: #8181A5;
+    font-weight: 700;
+  }
+
+  .messenger .footer .send-option{
+    width: 80px;
+  }
+
+  .messenger .footer .send-option button{
+    border: none;
+    padding: 0 2px;
+  }
+
+  .messenger .footer .inputBox{
+    flex-grow: 1;
+  }
+  
+  .emoji{
+    position:absolute;
+    bottom: 65px;
+    left: 0;
+  }
+
+  .sidebar{
+    position: fixed;
+    overflow-y: scroll;
+    height: 90vh;
+    width: 400px;
+    z-index: 2;
+  }
+  

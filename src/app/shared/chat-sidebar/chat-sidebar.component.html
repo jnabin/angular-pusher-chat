@@ -1,0 +1,20 @@
+<div class="conversation-list" (click)="openSession()">
+    <div
+    class="chat-item d-flex"
+    [ngClass]="{'selected': openUserId && openUserId == conversationItem.id}"
+    >
+      <div>
+        <div class="profile-pic">
+          <span class="profile-indentification">{{conversationItem?.name[0]}}</span>
+          <img *ngIf="isActive" class="active" src="/assets/images/active-chat.svg" alt="" srcset="">
+        </div>
+      </div>
+      <div>
+        <p>
+          <strong>{{conversationItem?.name}}</strong>
+          <span class="mute float-end">8:30</span>
+        </p>
+      </div>
+    </div>
+  </div>
+  
