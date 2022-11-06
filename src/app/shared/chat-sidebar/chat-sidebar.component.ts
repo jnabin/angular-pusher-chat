@@ -18,7 +18,7 @@ export class ChatSidebarComponent implements OnInit, OnChanges {
   constructor() { }
 
   ngOnChanges(changes: SimpleChanges): void {
-    console.log(this.activeUserIds);
+    //console.log(this.activeUserIds);
   }
 
   ngOnInit(): void {
@@ -29,8 +29,6 @@ export class ChatSidebarComponent implements OnInit, OnChanges {
   }
 
   getIsActive(id: number) {
-    console.log(id);
-    console.log(this.activeUserIds.includes(id.toString()));
     return this.activeUserIds.includes(id.toString());
   }
 

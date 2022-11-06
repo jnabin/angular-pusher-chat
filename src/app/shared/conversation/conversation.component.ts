@@ -87,7 +87,8 @@ export class ConversationComponent implements OnInit {
     // });
 
     forum.bind("pusher:subscription_succeeded", (members: any) => {
-      members = members.filter((x: any) => x.id != this.userDetail.id);
+      //members = members.filter((x: any) => x.id != this.userDetail.id);
+      console.log(members);
       // For example
       this.activeCount += members.count;
     
