@@ -15,8 +15,8 @@
           <span *ngIf="conversationItem.newMessage" class="new-message"></span>
           <span class="mute float-end">8:30</span>
         </p>
-        <p class="mb-0 latest-message">
-          Lorem ipsum dolor sit amet consectetur adipisicing elit. Eveniet debitis sunt rem, obcaecati laboriosam, rerum corporis voluptatibus magni enim totam delectus maiores similique, voluptate in quod. Totam voluptatibus eum laudantium.
+        <p *ngIf="conversationItem.latestMessage" class="mb-0 latest-message">
+          {{conversationItem.latestMessage}}
         </p>
       </div>
     </div>

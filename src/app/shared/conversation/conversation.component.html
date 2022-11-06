@@ -16,7 +16,7 @@
     </app-chat-sidebar>
   </div>
   <div class="messenger" [hidden]="closeConversation">
-    <div class="body" [ngClass]="{'white-bg': fromConversation}">
+    <div #scrollMe class="body" [ngClass]="{'white-bg': fromConversation}">
       <div class="message" [ngClass]="{me : message.me}" *ngFor="let message of messages; let i = index">
         <div class="message-content">
           <div class="image align-self-center">

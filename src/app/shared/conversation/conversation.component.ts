@@ -1,4 +1,4 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { AfterViewChecked, Component, ElementRef, Input, OnInit, ViewChild } from '@angular/core';
 import Pusher, { Channel, PresenceChannel } from 'pusher-js';
 import { AuthService } from 'src/app/services/auth.service';
 import { MessageService } from 'src/app/services/message.service';
@@ -9,8 +9,9 @@ import { UserService } from 'src/app/services/user.service';
   templateUrl: './conversation.component.html',
   styleUrls: ['./conversation.component.css']
 })
-export class ConversationComponent implements OnInit {
-
+export class ConversationComponent implements OnInit, AfterViewChecked {
+  @ViewChild('scrollMe') private myScrollContainer!: ElementRef;
+  
   messages: any[] = [];
   closeConversation: boolean = true;
   openUserId!: number;
@@ -41,12 +42,17 @@ export class ConversationComponent implements OnInit {
   sessionId!: number;
 
   constructor(private auth: AuthService, private messageService: MessageService, private userService: UserService) { }
+  
+  ngAfterViewChecked(): void {
+    this.scrollToBottom();
+  }
 
   getProfilePhoto(myself: boolean): string {
     return myself ? '/assets/images/myself.svg' : '/assets/images/other.svg';
   }
 
   ngOnInit(): void {
+    this.scrollToBottom();
     this.userService.getAllUsers().subscribe((res: any) => {
       this.users = (res as any[]).filter(x => x.id != this.userDetail.id);
     }, err => {
@@ -89,6 +95,7 @@ export class ConversationComponent implements OnInit {
       this.users.forEach(x => {
         if(x.id == data.fromUserId && this.opponentUserId != data.fromUserId) {
           x.newMessage = true;
+          x.latestMessage = data.message;
         }
       })
     });
@@ -235,6 +242,7 @@ export class ConversationComponent implements OnInit {
 
   openConversation(user: any) {
     user.newMessage = false;
+    user.latestMessage = null;
     let id = user.id;
     if(this.opponentUserId == id) return;
     this.closeConversation = true;
@@ -309,6 +317,12 @@ export class ConversationComponent implements OnInit {
     copy.splice(index , 1);
 
     return copy;
+  }
+
+  scrollToBottom(): void {
+    try {
+        this.myScrollContainer.nativeElement.scrollTop = this.myScrollContainer.nativeElement.scrollHeight;
+    } catch(err) { }                 
   }
 
 }
