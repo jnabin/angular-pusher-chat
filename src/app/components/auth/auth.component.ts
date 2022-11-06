@@ -9,7 +9,7 @@ import { AuthService } from 'src/app/services/auth.service';
   styleUrls: ['./auth.component.css']
 })
 export class AuthComponent implements OnInit {
-  isLoginMode = false;
+  isLoginMode = true;
   loading = false;
   error = '';
 

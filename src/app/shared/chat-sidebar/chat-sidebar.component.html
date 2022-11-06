@@ -10,9 +10,13 @@
         </div>
       </div>
       <div class="w-100">
-        <p class="mb-0">
-          <strong>{{conversationItem?.name}}</strong>
+        <p style="margin-bottom: 2px;">
+          <strong class="title-case">{{conversationItem?.name}}</strong>
+          <span *ngIf="conversationItem.newMessage" class="new-message"></span>
           <span class="mute float-end">8:30</span>
+        </p>
+        <p class="mb-0 latest-message">
+          Lorem ipsum dolor sit amet consectetur adipisicing elit. Eveniet debitis sunt rem, obcaecati laboriosam, rerum corporis voluptatibus magni enim totam delectus maiores similique, voluptate in quod. Totam voluptatibus eum laudantium.
         </p>
       </div>
     </div>

@@ -20,7 +20,7 @@ export class ConversationComponent implements OnInit {
   activeUserIds: string[] = [];
   expectedChatWith: any;
   opponentUserId!: number;
-  users: {name: string, id: number}[] = [];
+  users: any[] = [];
   @Input() fromConversation: boolean = false;
   @Input() conversation: any = {
     name: '',
@@ -77,7 +77,6 @@ export class ConversationComponent implements OnInit {
     this.pusher.signin();
 
     const notifications = this.pusher.subscribe(`private-notifications-${this.userDetail.id}`);
-    console.log(notifications);
     console.log(`private-notifications-${this.userDetail.id}`);
     const forum: PresenceChannel = this.pusher.subscribe( 'presence-forum' ) as PresenceChannel;
 
@@ -85,6 +84,14 @@ export class ConversationComponent implements OnInit {
     // forum.members.each((member: any) => {
     //   this.activeUserIds = this.addToArray(this.activeUserIds, member.id);
     // });
+
+    forum.bind(`new-message-to-${this.userDetail.id}`, (data: {fromUserId: number, message: string}) => {
+      this.users.forEach(x => {
+        if(x.id == data.fromUserId && this.opponentUserId != data.fromUserId) {
+          x.newMessage = true;
+        }
+      })
+    });
 
     forum.bind("pusher:subscription_succeeded", (members: any) => {
       //members = members.filter((x: any) => x.id != this.userDetail.id);
@@ -226,7 +233,9 @@ export class ConversationComponent implements OnInit {
     return this.privateChannels.find(x => x.userId == this.opponentUserId)?.chanelName as string;
   }
 
-  openConversation(id: number) {
+  openConversation(user: any) {
+    user.newMessage = false;
+    let id = user.id;
     if(this.opponentUserId == id) return;
     this.closeConversation = true;
     if(this.opponentUserId) {

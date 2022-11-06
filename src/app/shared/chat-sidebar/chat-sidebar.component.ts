@@ -25,7 +25,7 @@ export class ChatSidebarComponent implements OnInit, OnChanges {
   }
 
   openSession(){
-    this.openSessionClick.emit(this.conversationItem.id);
+    this.openSessionClick.emit(this.conversationItem);
   }
 
   getIsActive(id: number) {

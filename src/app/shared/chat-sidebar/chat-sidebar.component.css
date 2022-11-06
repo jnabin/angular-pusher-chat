@@ -8,6 +8,20 @@
     align-items: center;
   }
 
+  .chat-item div:last-child{
+    min-width: 0;
+  }
+
+  .title-case{
+    text-transform: capitalize;
+  }
+
+  .latest-message{
+    overflow-x: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
   .chat-item.selected{
     background: linear-gradient(0deg, rgba(94, 129, 244, 0.1), rgba(94, 129, 244, 0.1)), #FFFFFF;
   }
@@ -54,5 +68,14 @@
     text-transform: uppercase;
     color: white;
     background-color: #5E81F4;
+  }
+
+  .new-message{
+    display: inline-block;
+    background-color: rgb(30, 30, 146);
+    width: 10px;
+    height: 10px;
+    margin-left: 10px;
+    border-radius: 50%;
   }
   
