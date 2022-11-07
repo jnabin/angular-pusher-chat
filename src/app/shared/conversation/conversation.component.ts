@@ -15,7 +15,7 @@ export class ConversationComponent implements OnInit, AfterViewChecked {
   messages: any[] = [];
   closeConversation: boolean = true;
   openUserId!: number;
-  privateChannels: {chanel: Channel, userId: number, chanelName: string}[] = [];
+  privateChannels: {chanel: any, userId: number, chanelName: string}[] = [];
   privateChatIds: number[] = [];
   activeCount: number = 0;
   activeUserIds: string[] = [];
@@ -128,7 +128,8 @@ export class ConversationComponent implements OnInit, AfterViewChecked {
       if( data.initiated_by === this.userDetail.id && this.opponentUserId == data.chat_with) {
         this.startPrivateChat( data.chat_with, data.channel_name );
       } else if (data.chat_with == this.userDetail.id) {
-        this.startPrivateChat( data.initiated_by, data.channel_name );
+        this.privateChannels.push({chanel: null, userId: data.initiated_by, chanelName: data.channel_name});
+        //this.startPrivateChat( data.initiated_by, data.channel_name );
       }
 
     } );
@@ -142,26 +143,7 @@ export class ConversationComponent implements OnInit, AfterViewChecked {
   startPrivateChat( withUserId: number, channelName: string ) {  
     let privateChannel = this.pusher.subscribe( channelName );
     this.privateChannels.push({chanel: privateChannel, userId: withUserId, chanelName: channelName});
-    privateChannel.bind( 'message', (data: {fromUserId: number, toUserId: number, message: string, userName: string}) => {
-      if(data) {
-        let obj = {id: this.messages.length, body: data.message, userName: data.userName[0], time: '8.00 PM', me: data.fromUserId == this.userDetail.id};
-        this.messages = this.addToArray(this.messages, obj);
-        console.log(this.messages);
-      }
-    });
-
-    privateChannel.bind( 'user_typing', (data: {username: string, userId: number}) => {
-
-      if(data.userId !== this.userDetail.id) {
-        (document.getElementById('typing-indicator') as any).innerHTML = data.username + ' is typing...';
-
-        clearTimeout(this.clearTimerId);
-        this.clearTimerId = setTimeout(function () {
-          (document.getElementById('typing-indicator') as any).innerHTML = '';
-        }, 900);
-      }
-
-    } );
+    this.subscribeToRequestedChanel(privateChannel);
   }
 
   sendMessage() {
@@ -240,6 +222,30 @@ export class ConversationComponent implements OnInit, AfterViewChecked {
     return this.privateChannels.find(x => x.userId == this.opponentUserId)?.chanelName as string;
   }
 
+  subscribeToRequestedChanel(privateChannel: any){
+    privateChannel.bind( 'message', (data: {fromUserId: number, toUserId: number, message: string, userName: string}) => {
+      if(data) {
+        let obj = {id: this.messages.length, body: data.message, userName: data.userName[0], time: '8.00 PM', me: data.fromUserId == this.userDetail.id};
+        this.messages = this.addToArray(this.messages, obj);
+        console.log(this.messages);
+      }
+    });
+
+    privateChannel.bind( 'user_typing', (data: {username: string, userId: number}) => {
+
+      if(data.userId !== this.userDetail.id) {
+        (document.getElementById('typing-indicator') as any).innerHTML = data.username + ' is typing...';
+
+        clearTimeout(this.clearTimerId);
+        this.clearTimerId = setTimeout(function () {
+          (document.getElementById('typing-indicator') as any).innerHTML = '';
+        }, 900);
+      }
+
+    } );
+
+  }
+
   openConversation(user: any) {
     user.newMessage = false;
     user.latestMessage = null;
@@ -261,7 +267,11 @@ export class ConversationComponent implements OnInit, AfterViewChecked {
     if(this.privateChannels.find(x => x.userId == id) != null) {
       this.opponentUserId = id;
       this.closeConversation = false;
-
+      let chanelData = this.privateChannels.find(x => x.userId == id);
+      let index = this.privateChannels.indexOf(chanelData as any);
+      let privateChannel = this.pusher.subscribe( chanelData?.chanelName as string);
+      this.privateChannels[index].chanel = privateChannel;
+      this.subscribeToRequestedChanel(privateChannel);
       this.messageService.sessionMessages(this.userDetail.id, this.opponentUserId).subscribe(res => {
         if (res) {
           let filterMessages = (res.messages as any[]).filter(x => x.userid == this.userDetail.id);
