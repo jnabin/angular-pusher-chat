@@ -20,6 +20,7 @@ export class ConversationComponent implements OnInit, AfterViewChecked {
   activeCount: number = 0;
   activeUserIds: string[] = [];
   expectedChatWith: any;
+  //set = 'twitter';
   opponentUserId!: number;
   users: any[] = [];
   @Input() fromConversation: boolean = false;
@@ -193,6 +194,7 @@ export class ConversationComponent implements OnInit, AfterViewChecked {
   }
 
   addEmoji(event: any) {
+    this.publishTyping();
     this.messageContent += event.emoji.native;
   }
 
