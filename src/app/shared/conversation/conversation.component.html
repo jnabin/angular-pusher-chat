@@ -2,12 +2,19 @@
     <strong>User Name : </strong>
     <span>{{userDetail.name}}</span>
     <span class="ps-5">Active Users: {{activeCount}}</span>
+    <button  mat-raised-button 
+            class="ms-5" 
+            color="primary"
+            (click)="openGroupForm(groupForm)">
+      Create Group
+    </button>
 </div>
 <div class="position-relative">
   <div class="sidebar">
-    <app-chat-sidebar *ngFor="let item of users" 
+    <app-chat-sidebar *ngFor="let item of conversations" 
                       [conversationItem] = "item"
                       [openUserId]="opponentUserId"
+                      [isGroup] = "opponentChat?.isGroup"
                       [activeUserIds] = "activeUserIds"
                       [isActive] = "activeUserIds.includes(item.id.toString())"
                       (openSessionClick) = "openConversation($event)"
@@ -61,4 +68,29 @@
     </div>
   </div>
 </div>
+
+<ng-template #groupForm let-data>
+  <h2 mat-dialog-title>Create Group</h2>
+  <mat-dialog-content>
+    <div class="mb-3">
+      <label for="name" class="form-label">Group Name</label>
+      <input type="text" class="form-control" id="name" [(ngModel)]="data.groupChat.name">
+    </div>
+    <div class="mb-3">
+      <label for="exampleInputPassword1" class="form-label">Select Users</label>
+      <ul>
+        <li *ngFor="let user of data.groupChat.users">
+          <mat-checkbox [(ngModel)]="user.isSelected">
+            {{user.name | titlecase}}
+          </mat-checkbox>
+        </li>
+      </ul>
+    </div>
+  </mat-dialog-content>
+  <mat-dialog-actions>
+    <button mat-button mat-dialog-close>Cancel</button>
+    <button (click)="createGroupChat()" mat-raised-button color="warn">Create</button>
+  </mat-dialog-actions>
+</ng-template>
+
   

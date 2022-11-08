@@ -11,6 +11,7 @@ export class ChatSidebarComponent implements OnInit, OnChanges {
   @Input() isSelected: boolean = false;
   @Input() isActive: boolean = false;
   @Input() openUserId!: number;
+  @Input() isGroup: boolean = false;
   @Input() activeUserIds: string[] = [];
 
   @Output() openSessionClick: EventEmitter<any> = new EventEmitter();

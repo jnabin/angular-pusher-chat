@@ -24,7 +24,6 @@ import { ChatComponent } from './components/chat/chat.component';
     AppRoutingModule,
     BrowserAnimationsModule,
     SharedModule,
-    MaterialModule,
     FormsModule,
     HttpClientModule,
     NgbModule

@@ -18,12 +18,14 @@ import { PickerModule } from '@ctrl/ngx-emoji-mart';
   imports: [
     CommonModule,
     FormsModule,
-    PickerModule
+    PickerModule,
+    MaterialModule
   ],
   exports: [
     LoaderComponent,
     ConversationComponent,
-    ChatSidebarComponent
+    ChatSidebarComponent,
+    MaterialModule
   ]
 })
 export class SharedModule { }

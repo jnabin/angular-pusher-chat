@@ -1,12 +1,12 @@
 <div class="conversation-list" (click)="openSession()">
     <div
     class="chat-item d-flex"
-    [ngClass]="{'selected': openUserId && openUserId == conversationItem.id}"
+    [ngClass]="{'selected': openUserId && openUserId == conversationItem.id && isGroup == conversationItem.isGroup}"
     >
       <div>
         <div class="profile-pic">
           <span class="profile-indentification">{{conversationItem?.name[0]}}</span>
-          <img *ngIf="isActive" class="active" src="/assets/images/active-chat.svg" alt="" srcset="">
+          <img *ngIf="isActive && !conversationItem.isGroup" class="active" src="/assets/images/active-chat.svg" alt="" srcset="">
         </div>
       </div>
       <div class="w-100">

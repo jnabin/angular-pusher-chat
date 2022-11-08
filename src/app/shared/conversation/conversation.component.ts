@@ -1,6 +1,8 @@
-import { AfterViewChecked, Component, ElementRef, Input, OnInit, ViewChild } from '@angular/core';
+import { AfterViewChecked, Component, ElementRef, Input, OnInit, TemplateRef, ViewChild } from '@angular/core';
+import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import Pusher, { Channel, PresenceChannel } from 'pusher-js';
 import { AuthService } from 'src/app/services/auth.service';
+import { GroupService } from 'src/app/services/group.service';
 import { MessageService } from 'src/app/services/message.service';
 import { UserService } from 'src/app/services/user.service';
 
@@ -13,16 +15,20 @@ export class ConversationComponent implements OnInit, AfterViewChecked {
   @ViewChild('scrollMe') private myScrollContainer!: ElementRef;
   
   messages: any[] = [];
+  groupChatDialogRef!: MatDialogRef<any>;
+  newGroupChat!: {name: string, users: any[]}; 
   closeConversation: boolean = true;
   openUserId!: number;
-  privateChannels: {chanel: any, userId: number, chanelName: string}[] = [];
+  privateChannels: {chanel: any, userId: number, chanelName: string, groupIds: number[], groupId: number}[] = [];
   privateChatIds: number[] = [];
   activeCount: number = 0;
   activeUserIds: string[] = [];
   expectedChatWith: any;
   //set = 'twitter';
   opponentUserId!: number;
+  opponentChat!: any;
   users: any[] = [];
+  conversations: any[] = []
   @Input() fromConversation: boolean = false;
   @Input() conversation: any = {
     name: '',
@@ -40,9 +46,13 @@ export class ConversationComponent implements OnInit, AfterViewChecked {
   imageUrl: any;
   clearTimerId: any
   pusher!: Pusher;
-  sessionId!: number;
+  sessionId!: any;
 
-  constructor(private auth: AuthService, private messageService: MessageService, private userService: UserService) { }
+  constructor(private auth: AuthService, 
+              private messageService: MessageService, 
+              private userService: UserService,
+              private groupService: GroupService,
+              private matDialog: MatDialog) { }
   
   ngAfterViewChecked(): void {
     this.scrollToBottom();
@@ -53,14 +63,32 @@ export class ConversationComponent implements OnInit, AfterViewChecked {
   }
 
   ngOnInit(): void {
+    this.userDetail = this.auth.getUser();
     this.scrollToBottom();
-    this.userService.getAllUsers().subscribe((res: any) => {
-      this.users = (res as any[]).filter(x => x.id != this.userDetail.id);
+    this.groupService.getGroupsByUser(this.userDetail.id).subscribe(res => {
+      res.forEach(group => {
+        this.conversations.push({
+          name: group.groupName,
+          id: group.groupId,
+          isGroup: true
+        })
+      })
     }, err => {
       console.log(err);
     });
-    
-    this.userDetail = this.auth.getUser();
+    this.userService.getAllUsers().subscribe((res: any) => {
+      this.users = (res as any[]).filter(x => x.id != this.userDetail.id);
+      this.users.forEach(user => {
+        this.conversations.push({
+          name: user.name,
+          id: user.id,
+          isGroup: false
+        });
+      })
+    }, err => {
+      console.log(err);
+    });
+  
     Pusher.logToConsole = true;
     this.pusher = new Pusher('7836396d54cdb2c2bcdd', {
       cluster: 'ap2',
@@ -87,28 +115,34 @@ export class ConversationComponent implements OnInit, AfterViewChecked {
     console.log(`private-notifications-${this.userDetail.id}`);
     const forum: PresenceChannel = this.pusher.subscribe( 'presence-forum' ) as PresenceChannel;
 
-    // this.activeCount = forum.members.count;
-    // forum.members.each((member: any) => {
-    //   this.activeUserIds = this.addToArray(this.activeUserIds, member.id);
-    // });
+    forum.bind(`new-message-to-${this.userDetail.id}`, (data: {fromUserId: number, message: string, isGroup: boolean, groupId: number}) => {
+      if(!data.isGroup) {
+        this.conversations.forEach(x => {
+          if(x.id == data.fromUserId && !x.isGroup && this.opponentUserId != data.fromUserId) {
+            x.newMessage = true;
+            x.latestMessage = data.message;
+          }
+        })
+      }
+    });
 
-    forum.bind(`new-message-to-${this.userDetail.id}`, (data: {fromUserId: number, message: string}) => {
-      this.users.forEach(x => {
-        if(x.id == data.fromUserId && this.opponentUserId != data.fromUserId) {
-          x.newMessage = true;
-          x.latestMessage = data.message;
-        }
-      })
+    forum.bind(`group-new-message`, (data: {fromUserId: number, message: string, isGroup: boolean, groupId: number}) => {
+      if(data.isGroup) {
+        console.log(this.conversations);
+        this.conversations.forEach(x => {
+          if(x.id == data.groupId && x.isGroup && this.userDetail.id != data.fromUserId && this.opponentUserId != data.groupId) {
+            x.newMessage = true;
+            x.latestMessage = data.message;
+          }
+        })
+      }
     });
 
     forum.bind("pusher:subscription_succeeded", (members: any) => {
-      //members = members.filter((x: any) => x.id != this.userDetail.id);
       console.log(members);
-      // For example
       this.activeCount += members.count;
     
       members.each((member: any) => {
-        // For example
         this.activeUserIds = this.addToArray(this.activeUserIds, member.id);
       });
     });
@@ -124,16 +158,22 @@ export class ConversationComponent implements OnInit, AfterViewChecked {
     });
 
     notifications.bind( 'one-to-one-chat-request', (data: any) => {
-      console.log("nnnnnnnnnnnnnnnnnnnnnnn");
-      console.log(data);
       if( data.initiated_by === this.userDetail.id && this.opponentUserId == data.chat_with) {
         this.startPrivateChat( data.chat_with, data.channel_name );
       } else if (data.chat_with == this.userDetail.id) {
-        this.privateChannels.push({chanel: null, userId: data.initiated_by, chanelName: data.channel_name});
+        this.privateChannels.push({chanel: null, groupId: 0, groupIds: [], userId: data.initiated_by, chanelName: data.channel_name});
         //this.startPrivateChat( data.initiated_by, data.channel_name );
       }
+    });
 
-    } );
+    notifications.bind('group-chat-request', (data: any) => {
+      if( data.initiated_by === this.userDetail.id) {
+        this.startPrivateGroupChat( data.chat_with, data.channel_name, data.groupId );
+      } else if (data.chat_with == this.userDetail.id) {
+        this.privateChannels.push({chanel: null, groupId: data.groupId, groupIds: data.chat_with_ids, userId: 0, chanelName: data.channel_name});
+        //this.startPrivateChat( data.initiated_by, data.channel_name );
+      }
+    });
   }
 
   getCurrentTime(): string {
@@ -143,7 +183,14 @@ export class ConversationComponent implements OnInit, AfterViewChecked {
 
   startPrivateChat( withUserId: number, channelName: string ) {  
     let privateChannel = this.pusher.subscribe( channelName );
-    this.privateChannels.push({chanel: privateChannel, userId: withUserId, chanelName: channelName});
+    this.privateChannels.push({chanel: privateChannel, groupId: 0, groupIds: [], userId: withUserId, chanelName: channelName});
+    this.subscribeToRequestedChanel(privateChannel);
+  }
+
+  startPrivateGroupChat( withUserIds: number[], channelName: string, groupId: number ) {  
+    let privateChannel = this.pusher.subscribe( channelName );
+    this.privateChannels.push({chanel: privateChannel, groupId: groupId, groupIds: withUserIds, userId: 0, chanelName: channelName});
+    console.log(this.privateChannels);
     this.subscribeToRequestedChanel(privateChannel);
   }
 
@@ -151,7 +198,7 @@ export class ConversationComponent implements OnInit, AfterViewChecked {
     this.toggleEmojiPicker = false;
     if(this.messageContent.length == 0 && this.imageUrl == null) return;
     //this.botReplay(lastMessageId++);
-    this.messageService.sendMessage(this.userDetail.id, this.opponentUserId, this.messageContent, this.sessionId, this.userDetail.name, this.ChannelName).subscribe(res => {
+    this.messageService.sendMessage(this.userDetail.id, this.opponentUserId, this.messageContent, this.sessionId, this.userDetail.name, this.ChannelName, this.opponentUserId).subscribe(res => {
       console.log(res);
       this.nullMessageContent();
     }, err => {
@@ -221,7 +268,8 @@ export class ConversationComponent implements OnInit, AfterViewChecked {
   }
 
   get ChannelName(): string {
-    return this.privateChannels.find(x => x.userId == this.opponentUserId)?.chanelName as string;
+    return this.opponentChat.isGroup ? this.privateChannels.find(x => x.groupId == this.opponentUserId)?.chanelName as string : 
+    this.privateChannels.find(x => x.userId == this.opponentUserId)?.chanelName as string;
   }
 
   subscribeToRequestedChanel(privateChannel: any){
@@ -248,32 +296,46 @@ export class ConversationComponent implements OnInit, AfterViewChecked {
 
   }
 
+  unsubscribeChannel(dto: any) {
+    this.pusher.unsubscribe(dto?.chanelName as string);
+    dto?.chanel.unbind("message");
+    dto?.chanel.unbind("user_typing");
+    let index = this.privateChannels.indexOf(dto);
+    this.privateChannels.splice(index, 1);
+  }
+
+  subscribeToOpenedConversation(data: any) {
+    let id = data.id;
+    this.opponentUserId = id;
+    this.opponentChat = data;
+    this.closeConversation = false;
+    let chanelData = this.privateChannels.find(x => x.userId == id);
+    let index = this.privateChannels.indexOf(chanelData as any);
+    let privateChannel = this.pusher.subscribe( chanelData?.chanelName as string);
+    this.privateChannels[index].chanel = privateChannel;
+    this.subscribeToRequestedChanel(privateChannel);
+  }
+
   openConversation(user: any) {
     user.newMessage = false;
     user.latestMessage = null;
     let id = user.id;
-    if(this.opponentUserId == id) return;
+    if(this.opponentUserId == id && this.opponentChat.isGroup == user.isGroup) return;
     this.closeConversation = true;
     if(this.opponentUserId) {
-      let dto = this.privateChannels.find(x => x.userId == this.opponentUserId);
-      if(dto) {
-        this.pusher.unsubscribe(dto?.chanelName as string);
-        dto?.chanel.unbind("message");
-        dto?.chanel.unbind("user_typing");
-        let index = this.privateChannels.indexOf(dto);
-        this.privateChannels.splice(index, 1);
-      }
+      let dto = this.privateChannels.find(x => x.userId == this.opponentUserId && x.groupId == 0);
+      let groupdto = this.privateChannels.find(x => x.groupId == this.opponentUserId && x.userId == 0);
+
+      if (dto)  this.unsubscribeChannel(dto);
+      if (groupdto) this.unsubscribeChannel(groupdto);
     } 
     this.messages = [];
     this.opponentUserId = id;
-    if(this.privateChannels.find(x => x.userId == id) != null) {
-      this.opponentUserId = id;
-      this.closeConversation = false;
-      let chanelData = this.privateChannels.find(x => x.userId == id);
-      let index = this.privateChannels.indexOf(chanelData as any);
-      let privateChannel = this.pusher.subscribe( chanelData?.chanelName as string);
-      this.privateChannels[index].chanel = privateChannel;
-      this.subscribeToRequestedChanel(privateChannel);
+    this.opponentChat = user;
+    console.log(this.opponentChat);
+    console.log(this.privateChannels);
+    if(this.privateChannels.find(x => x.userId == id && x.groupId == 0) != null) {
+      this.subscribeToOpenedConversation(user);
       this.messageService.sessionMessages(this.userDetail.id, this.opponentUserId).subscribe(res => {
         if (res) {
           let filterMessages = (res.messages as any[]).filter(x => x.userid == this.userDetail.id);
@@ -289,7 +351,49 @@ export class ConversationComponent implements OnInit, AfterViewChecked {
       }, err => {
         console.log(err);
       })
-    } else {
+    } 
+    else if((this.privateChannels.find(x => x.groupId == id && x.userId == 0) != null)) {
+      this.sessionId = null;
+      this.subscribeToOpenedConversation(user);
+      this.messageService.groupMessages(this.opponentUserId).subscribe(res => {
+        if (res) {
+          res.messages.forEach(m => {
+            const isMe = m.userId == this.userDetail.id;
+            this.messages.push(
+              {id: m.mid, body: m.message, userName: m.uname[0], time: '8.00 PM', me: isMe}
+            );
+          });
+
+          this.closeConversation = false;
+        }
+      }, err => {
+        console.log(err);
+      })
+    } 
+    else if(this.opponentChat.isGroup) {
+      this.sessionId = null;
+      let userIds: number[] = [];
+      this.groupService.getUsersByGroup(this.opponentUserId).subscribe((res) => {
+        userIds = res.map(x => x.userId);
+        this.messageService.groupMessagesWithChannel(this.opponentUserId, userIds, this.userDetail.id).subscribe(res => {
+          if (res) {
+            res.messages.forEach(m => {
+              const isMe = m.userId == this.userDetail.id;
+              this.messages.push(
+                {id: m.mid, body: m.message, userName: m.uname[0], time: '8.00 PM', me: isMe}
+              );
+            });
+  
+            this.closeConversation = false;
+          }
+        }, err => {
+          console.log(err);
+        })
+      }, err => {
+        console.log(err);
+      })
+    }
+    else {
       this.messageService.requestSession(this.opponentUserId, this.userDetail.id, this.userDetail.id, this.opponentUserId).subscribe(res => {
         if (res) {
           let filterMessages = (res.messages as any[]).filter(x => x.userid == this.userDetail.id);
@@ -335,6 +439,40 @@ export class ConversationComponent implements OnInit, AfterViewChecked {
     try {
         this.myScrollContainer.nativeElement.scrollTop = this.myScrollContainer.nativeElement.scrollHeight;
     } catch(err) { }                 
+  }
+
+  openGroupForm(template: TemplateRef<any>){
+    this.users.forEach(user => user.isSelected = false);
+    this.newGroupChat = {name: '', users: [...this.users, {name: this.userDetail.name, id: this.userDetail.id, isSelected: true}]};
+    this.groupChatDialogRef = this.matDialog.open(template, {
+      width: '600px',
+      data: { groupChat: this.newGroupChat },
+    })
+  }
+
+  createGroupChat() {
+    const userIds = this.newGroupChat.users.filter(x => x.isSelected).map(x => x.id);
+    this.groupService.createGroup(this.userDetail.id, userIds, this.newGroupChat.name).subscribe(res => {
+      const name = this.newGroupChat.name;
+      //this.newGroupChat = {name: '', users: []};
+      this.groupChatDialogRef.close();
+      this.opponentUserId = res; 
+      this.opponentChat = {name: name, id: res, isGroup: true}
+      this.closeConversation = false;
+      this.conversations.push({name: name, id: res, isGroup: true});
+      console.log(res);
+    }, err => {
+      console.log(err);
+    });
+  }
+
+  isSameGroupUsers(a: number[], b: number[]): boolean {
+    if (a.length != this.clearTimerId.length) return false;
+
+    for (var i = 0; i < a.length; ++i) {
+      if (a[i] !== b[i]) return false;
+    }
+    return true;
   }
 
 }

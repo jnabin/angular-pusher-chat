@@ -12,18 +12,20 @@ export class MessageService {
 
   constructor(private http: HttpClient, private auth: AuthService) { }
 
-  sendMessage(fromUserId: number, toUserId: number, message: string, sessionId: number, username: string, chanelName: string): Observable<any>{
+  sendMessage(fromUserId: number, toUserId: number, message: string, sessionId: number, username: string, chanelName: string, groupChatId: number): Observable<any>{
     return this.http.post(`${this.api}messages`, {
       fromUserId: fromUserId,
       toUserId: toUserId,
       message: message,
       sessionId: sessionId,
       username: username,
-      chanelName: chanelName
+      chanelName: chanelName,
+      groupChatId: groupChatId
     });
   }
 
   publishUserTyping(username: string, fromUserId:number, user_one_id: number, user_two_id: number, chanelName: string): Observable<any>{
+    //console.log(chanelName);
     return this.http.post(`${this.api}userTyping`, {
       username: username,
       fromUserId: fromUserId,
@@ -46,6 +48,20 @@ export class MessageService {
     return this.http.post(`${this.api}sessionMessages`, {
       user_one_id: user_one_id,
       user_two_id: user_two_id
+    });
+  }
+
+  groupMessages(groupId: number): Observable<{messages: any[]}>{
+    return this.http.post<{messages: any}>(`${this.api}groupMessages`, {
+      groupId: groupId,
+    });
+  }
+
+  groupMessagesWithChannel(groupId: number, userIds: number[], fromUserId: number): Observable<{messages: any[]}>{
+    return this.http.post<{messages: any}>(`${this.api}groupMessagesWithChannel`, {
+      groupId: groupId,
+      userIds: userIds,
+      fromUserId: fromUserId
     });
   }
 }
