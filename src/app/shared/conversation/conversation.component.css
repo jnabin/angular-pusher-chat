@@ -1,7 +1,7 @@
 .messenger{
     display: flex;
     flex-direction: column;
-    height: 90vh;
+    height: calc(100vh - 112px);
     padding-left: 320px;
     gap: 20px;
   }
@@ -47,17 +47,39 @@
     font-size: 16px;
     text-align: center;
   }
-  .content{
+  .message-content .content{
     white-space: pre-line;
     width: calc(100% - 24px);
     flex-wrap: 1;
     padding: 10px 15px;
+    position: relative;
     font-size: 14px;
     line-height: 21px;
     color: #1C1D21;
     background-color: white;
+    min-width: 54px;
     border-radius: 18.5px 18.5px 18.5px 0px;
   }
+
+  .message-content .content .options{
+    position: absolute;
+    background-color: gray;
+    color: white;
+    border-radius: 10px;
+    padding: 1px 5px;
+    top: -15px;
+    right: -7px;
+    display: none;
+  }
+
+  .message-content .content:hover .options{
+    display: block;
+  }
+
+  .message-content .content:hover .options .logo-wrapper{
+    cursor: pointer;
+  }
+
   .content.gray-content{
     background-color: #F6F6F6;
   }
@@ -87,11 +109,16 @@
     flex-basis: calc(100vh - 120px);
   }
 
+  .footer-wrapper{
+    margin: 20px 15px;
+    position: relative;
+    margin-bottom: 0px;
+  }
+
   .messenger .footer{
     position: relative;
     display: flex;
-    margin: 20px 15px;
-    flex-basis: 74px;
+    height: 74px;
     background: #F5F5FA;
     border-radius: 12px;
     padding: 15px 10px;
@@ -139,7 +166,7 @@
   .sidebar{
     position: fixed;
     overflow-y: scroll;
-    height: 90vh;
+    height: calc(100vh - 112px);
     width: 300px;
     z-index: 2;
   }

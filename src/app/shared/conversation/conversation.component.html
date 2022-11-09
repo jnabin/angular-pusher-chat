@@ -30,6 +30,14 @@
             <span class="user-title">{{message.userName[0]}}</span>
           </div>
           <div class="content" [ngClass]="{'gray-content': fromConversation}">
+            <div class="options">
+              <span class="logo-wrapper" (click)="replayProcess({message: message.body, name: message.userName})">
+                <span class="iconify me-3" data-icon="fa-solid:reply"></span>
+              </span>
+              <span class="logo-wrapper">
+                <span class="iconify" data-icon="ant-design:edit-filled"></span>
+              </span>
+            </div>
             {{message.body}}
             <img *ngIf="message.image" [src]="message.image" alt="" srcset="">
           </div>
@@ -39,7 +47,14 @@
         </div>
       </div>
     </div>
-    <div class="footer">
+    <div class="footer-wrapper">
+      <div class="reply-section" *ngIf="replying">
+        <app-reply-message [replyUserName]="replyUserName" 
+                           [replyMessage]="replyMessage"
+                           (cancel)="replying = false">
+        </app-reply-message>
+      </div>
+      <div class="footer">
         <span id="typing-indicator"></span>
       <input type="file" class="d-none" accept="image/*" #fileInput
           (change)="fileSelect($event)" />
@@ -52,7 +67,7 @@
       >
       </emoji-mart>
       <div class="inputBox" (click)="toggleEmojiPicker = false">
-        <textarea id="textarea1" (keyup)="publishTyping()" [(ngModel)]="messageContent" (keydown)="triggerFunction($event)"></textarea>
+        <textarea placeholder="send message" id="textarea1" (keyup)="publishTyping()" [(ngModel)]="messageContent" (keydown)="triggerFunction($event)"></textarea>
       </div>
       <div class="send-option align-self-center">
         <button class="pl-0">
@@ -64,6 +79,7 @@
         <button class="pr-0" (click)="sendMessage()">
           <img src="/assets/images/send-btn.svg" alt="" srcset="">
         </button>
+      </div>
       </div>
     </div>
   </div>

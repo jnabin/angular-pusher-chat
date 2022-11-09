@@ -6,6 +6,8 @@ import { LoaderComponent } from './loader/loader.component';
 import { ConversationComponent } from './conversation/conversation.component';
 import { ChatSidebarComponent } from './chat-sidebar/chat-sidebar.component';
 import { PickerModule } from '@ctrl/ngx-emoji-mart';
+import { IconModule } from '@visurel/iconify-angular';
+import { ReplyMessageComponent } from './reply-message/reply-message.component';
 
 
 
@@ -13,19 +15,22 @@ import { PickerModule } from '@ctrl/ngx-emoji-mart';
   declarations: [
     LoaderComponent,
     ConversationComponent,
-    ChatSidebarComponent
+    ChatSidebarComponent,
+    ReplyMessageComponent
   ],
   imports: [
     CommonModule,
     FormsModule,
     PickerModule,
-    MaterialModule
+    MaterialModule,
+    IconModule
   ],
   exports: [
     LoaderComponent,
     ConversationComponent,
     ChatSidebarComponent,
-    MaterialModule
+    MaterialModule,
+    ReplyMessageComponent
   ]
 })
 export class SharedModule { }

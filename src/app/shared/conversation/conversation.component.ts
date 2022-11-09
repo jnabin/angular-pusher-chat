@@ -15,6 +15,9 @@ export class ConversationComponent implements OnInit, AfterViewChecked {
   @ViewChild('scrollMe') private myScrollContainer!: ElementRef;
   
   messages: any[] = [];
+  replying = false;
+  replyUserName = '';
+  replyMessage = '';
   groupChatDialogRef!: MatDialogRef<any>;
   newGroupChat!: {name: string, users: any[]}; 
   closeConversation: boolean = true;
@@ -169,7 +172,8 @@ export class ConversationComponent implements OnInit, AfterViewChecked {
     notifications.bind('group-chat-request', (data: any) => {
       if( data.initiated_by === this.userDetail.id) {
         this.startPrivateGroupChat( data.chat_with, data.channel_name, data.groupId );
-      } else if (data.chat_with == this.userDetail.id) {
+      } else if ((data.chat_with_ids as any[]).includes(this.userDetail.id)) {
+        this.conversations.push({name: data.groupName, id: data.groupId, isGroup: true, newGroup: true});
         this.privateChannels.push({chanel: null, groupId: data.groupId, groupIds: data.chat_with_ids, userId: 0, chanelName: data.channel_name});
         //this.startPrivateChat( data.initiated_by, data.channel_name );
       }
@@ -304,12 +308,13 @@ export class ConversationComponent implements OnInit, AfterViewChecked {
     this.privateChannels.splice(index, 1);
   }
 
-  subscribeToOpenedConversation(data: any) {
+  subscribeToOpenedConversation(data: any, isgroup: boolean) {
     let id = data.id;
     this.opponentUserId = id;
     this.opponentChat = data;
     this.closeConversation = false;
-    let chanelData = this.privateChannels.find(x => x.userId == id);
+    let chanelData = isgroup ? this.privateChannels.find(x => x.groupId == id && x.userId == 0) : 
+                                this.privateChannels.find(x => x.userId == id && x.groupId == 0);
     let index = this.privateChannels.indexOf(chanelData as any);
     let privateChannel = this.pusher.subscribe( chanelData?.chanelName as string);
     this.privateChannels[index].chanel = privateChannel;
@@ -318,6 +323,7 @@ export class ConversationComponent implements OnInit, AfterViewChecked {
 
   openConversation(user: any) {
     user.newMessage = false;
+    user.newGroup = false;
     user.latestMessage = null;
     let id = user.id;
     if(this.opponentUserId == id && this.opponentChat.isGroup == user.isGroup) return;
@@ -332,17 +338,16 @@ export class ConversationComponent implements OnInit, AfterViewChecked {
     this.messages = [];
     this.opponentUserId = id;
     this.opponentChat = user;
-    console.log(this.opponentChat);
-    console.log(this.privateChannels);
+
     if(this.privateChannels.find(x => x.userId == id && x.groupId == 0) != null) {
-      this.subscribeToOpenedConversation(user);
+      this.subscribeToOpenedConversation(user, false);
       this.messageService.sessionMessages(this.userDetail.id, this.opponentUserId).subscribe(res => {
         if (res) {
           let filterMessages = (res.messages as any[]).filter(x => x.userid == this.userDetail.id);
           filterMessages.forEach(m => {
             const isMe = m.usertype == 0;
             this.messages.push(
-              {id: m.mid, body: m.message, userName: m.uname[0], time: '8.00 PM', me: isMe}
+              {id: m.mid, body: m.message, userName: m.uname, time: '8.00 PM', me: isMe}
             );
           });
           this.sessionId = res.id;
@@ -354,13 +359,13 @@ export class ConversationComponent implements OnInit, AfterViewChecked {
     } 
     else if((this.privateChannels.find(x => x.groupId == id && x.userId == 0) != null)) {
       this.sessionId = null;
-      this.subscribeToOpenedConversation(user);
+      this.subscribeToOpenedConversation(user, true);
       this.messageService.groupMessages(this.opponentUserId).subscribe(res => {
         if (res) {
           res.messages.forEach(m => {
             const isMe = m.userId == this.userDetail.id;
             this.messages.push(
-              {id: m.mid, body: m.message, userName: m.uname[0], time: '8.00 PM', me: isMe}
+              {id: m.mid, body: m.message, userName: m.uname, time: '8.00 PM', me: isMe}
             );
           });
 
@@ -380,7 +385,7 @@ export class ConversationComponent implements OnInit, AfterViewChecked {
             res.messages.forEach(m => {
               const isMe = m.userId == this.userDetail.id;
               this.messages.push(
-                {id: m.mid, body: m.message, userName: m.uname[0], time: '8.00 PM', me: isMe}
+                {id: m.mid, body: m.message, userName: m.uname, time: '8.00 PM', me: isMe}
               );
             });
   
@@ -400,7 +405,7 @@ export class ConversationComponent implements OnInit, AfterViewChecked {
           filterMessages.forEach(m => {
             const isMe = m.usertype == 0;
             this.messages.push(
-              {id: m.mid, body: m.message, userName: m.uname[0], time: '8.00 PM', me: isMe}
+              {id: m.mid, body: m.message, userName: m.uname, time: '8.00 PM', me: isMe}
             );
           });
           this.sessionId = res.id;
@@ -473,6 +478,12 @@ export class ConversationComponent implements OnInit, AfterViewChecked {
       if (a[i] !== b[i]) return false;
     }
     return true;
+  }
+
+  replayProcess(data: any){
+    this.replying = true;
+    this.replyMessage = data.message;
+    this.replyUserName = data.name;
   }
 
 }
