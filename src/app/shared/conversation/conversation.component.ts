@@ -13,11 +13,13 @@ import { UserService } from 'src/app/services/user.service';
 })
 export class ConversationComponent implements OnInit, AfterViewChecked {
   @ViewChild('scrollMe') private myScrollContainer!: ElementRef;
+  @ViewChild('playAudio') private playAudio!: ElementRef;
   
   messages: any[] = [];
   replying = false;
   replyUserName = '';
   replyMessage = '';
+  parentMessageId = 0;
   groupChatDialogRef!: MatDialogRef<any>;
   newGroupChat!: {name: string, users: any[]}; 
   closeConversation: boolean = true;
@@ -124,6 +126,7 @@ export class ConversationComponent implements OnInit, AfterViewChecked {
           if(x.id == data.fromUserId && !x.isGroup && this.opponentUserId != data.fromUserId) {
             x.newMessage = true;
             x.latestMessage = data.message;
+            this.playAudio.nativeElement.click();
           }
         })
       }
@@ -136,6 +139,7 @@ export class ConversationComponent implements OnInit, AfterViewChecked {
           if(x.id == data.groupId && x.isGroup && this.userDetail.id != data.fromUserId && this.opponentUserId != data.groupId) {
             x.newMessage = true;
             x.latestMessage = data.message;
+            this.playAudio.nativeElement.click();
           }
         })
       }
@@ -202,22 +206,22 @@ export class ConversationComponent implements OnInit, AfterViewChecked {
     this.toggleEmojiPicker = false;
     if(this.messageContent.length == 0 && this.imageUrl == null) return;
     //this.botReplay(lastMessageId++);
-    this.messageService.sendMessage(this.userDetail.id, this.opponentUserId, this.messageContent, this.sessionId, this.userDetail.name, this.ChannelName, this.opponentUserId).subscribe(res => {
+    this.messageService.sendMessage(
+      this.userDetail.id, 
+      this.opponentUserId, 
+      this.messageContent, 
+      this.sessionId, 
+      this.userDetail.name, 
+      this.ChannelName, 
+      this.opponentUserId,
+      this.replying,
+      this.parentMessageId).subscribe(res => {
       console.log(res);
       this.nullMessageContent();
     }, err => {
       console.log(err);
       this.nullMessageContent();
     });
-  }
-
-  botReplay(lastMessageId: number){
-    setTimeout(() => {
-      this.conversation.messages.push(
-        {id: lastMessageId++, body: 'I am seeing your message!', image: '', time: this.getCurrentTime(), me: false }
-      );
-      this.playSound();
-    }, 1500);
   }
 
   nullMessageContent() {
@@ -229,7 +233,7 @@ export class ConversationComponent implements OnInit, AfterViewChecked {
     let audio = new Audio();
     audio.src = "../../assets/audio/notification_bell.mp3";
     audio.load();
-    audio.play();
+    //audio.play();
   }
 
 
@@ -279,7 +283,7 @@ export class ConversationComponent implements OnInit, AfterViewChecked {
   subscribeToRequestedChanel(privateChannel: any){
     privateChannel.bind( 'message', (data: {fromUserId: number, toUserId: number, message: string, userName: string}) => {
       if(data) {
-        let obj = {id: this.messages.length, body: data.message, userName: data.userName[0], time: '8.00 PM', me: data.fromUserId == this.userDetail.id};
+        let obj = {id: this.messages.length, body: data.message, userName: data.userName[0], time: new Date(), me: data.fromUserId == this.userDetail.id};
         this.messages = this.addToArray(this.messages, obj);
         console.log(this.messages);
       }
@@ -343,11 +347,12 @@ export class ConversationComponent implements OnInit, AfterViewChecked {
       this.subscribeToOpenedConversation(user, false);
       this.messageService.sessionMessages(this.userDetail.id, this.opponentUserId).subscribe(res => {
         if (res) {
+          console.log(res);
           let filterMessages = (res.messages as any[]).filter(x => x.userid == this.userDetail.id);
           filterMessages.forEach(m => {
             const isMe = m.usertype == 0;
             this.messages.push(
-              {id: m.mid, body: m.message, userName: m.uname, time: '8.00 PM', me: isMe}
+              {id: m.mid, body: m.message, userName: m.uname, time: m.time, me: isMe}
             );
           });
           this.sessionId = res.id;
@@ -365,7 +370,7 @@ export class ConversationComponent implements OnInit, AfterViewChecked {
           res.messages.forEach(m => {
             const isMe = m.userId == this.userDetail.id;
             this.messages.push(
-              {id: m.mid, body: m.message, userName: m.uname, time: '8.00 PM', me: isMe}
+              {id: m.mid, body: m.message, userName: m.uname, time: m.time, me: isMe}
             );
           });
 
@@ -385,7 +390,7 @@ export class ConversationComponent implements OnInit, AfterViewChecked {
             res.messages.forEach(m => {
               const isMe = m.userId == this.userDetail.id;
               this.messages.push(
-                {id: m.mid, body: m.message, userName: m.uname, time: '8.00 PM', me: isMe}
+                {id: m.mid, body: m.message, userName: m.uname, time: m.time, me: isMe}
               );
             });
   
@@ -405,7 +410,7 @@ export class ConversationComponent implements OnInit, AfterViewChecked {
           filterMessages.forEach(m => {
             const isMe = m.usertype == 0;
             this.messages.push(
-              {id: m.mid, body: m.message, userName: m.uname, time: '8.00 PM', me: isMe}
+              {id: m.mid, body: m.message, userName: m.uname, time: m.time, me: isMe}
             );
           });
           this.sessionId = res.id;
@@ -484,6 +489,7 @@ export class ConversationComponent implements OnInit, AfterViewChecked {
     this.replying = true;
     this.replyMessage = data.message;
     this.replyUserName = data.name;
+    this.parentMessageId = data.id;
   }
 
 }

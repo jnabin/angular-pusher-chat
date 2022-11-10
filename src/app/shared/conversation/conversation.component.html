@@ -1,3 +1,4 @@
+<button #playAudio class="d-none" type="button" (click)="playSound()">play</button>
 <div class="user-details mb-3">
     <strong>User Name : </strong>
     <span>{{userDetail.name}}</span>
@@ -43,7 +44,7 @@
           </div>
         </div>
         <div class="time" [hidden] = "i < conversation.messages.length-1 && message.me == conversation.messages[i+1].me && message.time == conversation.messages[i+1].time">
-          {{message.time}}
+          {{message.time | date:'shortTime'}}
         </div>
       </div>
     </div>

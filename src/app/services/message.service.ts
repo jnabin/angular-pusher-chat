@@ -12,7 +12,14 @@ export class MessageService {
 
   constructor(private http: HttpClient, private auth: AuthService) { }
 
-  sendMessage(fromUserId: number, toUserId: number, message: string, sessionId: number, username: string, chanelName: string, groupChatId: number): Observable<any>{
+  sendMessage(fromUserId: number, toUserId: number, message: string, sessionId: number, username: string, chanelName: string, groupChatId: number, isReply: boolean, parentMessageId: any): Observable<any>{
+    let messageType = '';
+    if(isReply) {
+      messageType = 'reply'
+    } else {
+      parentMessageId = null;
+    }
+
     return this.http.post(`${this.api}messages`, {
       fromUserId: fromUserId,
       toUserId: toUserId,
@@ -20,7 +27,9 @@ export class MessageService {
       sessionId: sessionId,
       username: username,
       chanelName: chanelName,
-      groupChatId: groupChatId
+      groupChatId: groupChatId,
+      messageType: messageType,
+      parentMessageId: parentMessageId
     });
   }
 
