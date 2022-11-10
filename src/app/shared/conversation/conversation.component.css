@@ -22,6 +22,27 @@
     flex-direction: column;
   }
 
+  .message .message-date{
+    display: flex;
+    flex: 1;
+    gap: 20px;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    margin-bottom: 10px;
+  }
+
+  .message .message-date .line{
+    flex-grow: 1;
+    height: 1px;
+    background-color: #dcd9d9;
+  }
+
+  .message .message-date .date-value{
+    color: #969696;
+    font-size: 14px;
+  }
+
   .time{
     margin: 5px 0px;
     padding-left: 32px;

@@ -26,6 +26,11 @@
   <div class="messenger" [hidden]="closeConversation">
     <div #scrollMe class="body" [ngClass]="{'white-bg': fromConversation}">
       <div class="message" [ngClass]="{me : message.me}" *ngFor="let message of messages; let i = index">
+        <div class="message-date" [hidden]="(i < messages.length-1 && message.date != messages[i+1].date) || (i > 0 && message.date == messages[i-1].date)">
+          <div class="line"></div>
+          <div class="date-value">{{message.time | date:'longDate'}}</div>
+          <div class="line"></div>
+        </div>
         <div class="message-content">
           <div class="image align-self-center">
             <span class="user-title">{{message.userName[0]}}</span>
@@ -43,9 +48,14 @@
             <img *ngIf="message.image" [src]="message.image" alt="" srcset="">
           </div>
         </div>
-        <div class="time" [hidden] = "i < conversation.messages.length-1 && message.me == conversation.messages[i+1].me && message.time == conversation.messages[i+1].time">
+        <div class="time" [hidden]="i < messages.length-1 && message.me == messages[i+1].me && message.rawTime == messages[i+1].rawTime">
           {{message.time | date:'shortTime'}}
         </div>
+        <ng-template #rawTime>
+          <div class="time">
+            {{message.time | date:'medium'}}
+          </div>
+        </ng-template>
       </div>
     </div>
     <div class="footer-wrapper">
@@ -68,7 +78,7 @@
       >
       </emoji-mart>
       <div class="inputBox" (click)="toggleEmojiPicker = false">
-        <textarea placeholder="send message" id="textarea1" (keyup)="publishTyping()" [(ngModel)]="messageContent" (keydown)="triggerFunction($event)"></textarea>
+        <textarea placeholder="send message" #messageInput id="textarea1" (keyup)="publishTyping()" [(ngModel)]="messageContent" (keydown)="triggerFunction($event)"></textarea>
       </div>
       <div class="send-option align-self-center">
         <button class="pl-0">

@@ -14,6 +14,7 @@ import { UserService } from 'src/app/services/user.service';
 export class ConversationComponent implements OnInit, AfterViewChecked {
   @ViewChild('scrollMe') private myScrollContainer!: ElementRef;
   @ViewChild('playAudio') private playAudio!: ElementRef;
+  @ViewChild('messageInput') messageInput!: ElementRef;
   
   messages: any[] = [];
   replying = false;
@@ -216,7 +217,6 @@ export class ConversationComponent implements OnInit, AfterViewChecked {
       this.opponentUserId,
       this.replying,
       this.parentMessageId).subscribe(res => {
-      console.log(res);
       this.nullMessageContent();
     }, err => {
       console.log(err);
@@ -225,6 +225,7 @@ export class ConversationComponent implements OnInit, AfterViewChecked {
   }
 
   nullMessageContent() {
+    this.nullReplyMessage();
     this.messageContent = '';
     this.imageUrl = null;
   }
@@ -275,6 +276,21 @@ export class ConversationComponent implements OnInit, AfterViewChecked {
     });
   }
 
+  getTimeWithPmAM(date: Date){
+    return date.toLocaleTimeString('en-US', {
+      hour: '2-digit',
+      minute: '2-digit',
+    });
+  }
+
+  getRawDate(date: Date) {
+    return `${date.getMonth()}/${date.getDate()}/${date.getFullYear()} ${this.getTimeWithPmAM(date)}`;
+  }
+
+  getOnlyDate(date: Date) {
+    return `${date.getMonth()}/${date.getDate()}/${date.getFullYear()}`;
+  }
+
   get ChannelName(): string {
     return this.opponentChat.isGroup ? this.privateChannels.find(x => x.groupId == this.opponentUserId)?.chanelName as string : 
     this.privateChannels.find(x => x.userId == this.opponentUserId)?.chanelName as string;
@@ -283,7 +299,7 @@ export class ConversationComponent implements OnInit, AfterViewChecked {
   subscribeToRequestedChanel(privateChannel: any){
     privateChannel.bind( 'message', (data: {fromUserId: number, toUserId: number, message: string, userName: string}) => {
       if(data) {
-        let obj = {id: this.messages.length, body: data.message, userName: data.userName[0], time: new Date(), me: data.fromUserId == this.userDetail.id};
+        let obj = {id: this.messages.length, body: data.message, userName: data.userName[0], date: this.getOnlyDate(new Date()), time: new Date(), rawTime: this.getRawDate(new Date()), me: data.fromUserId == this.userDetail.id};
         this.messages = this.addToArray(this.messages, obj);
         console.log(this.messages);
       }
@@ -352,7 +368,7 @@ export class ConversationComponent implements OnInit, AfterViewChecked {
           filterMessages.forEach(m => {
             const isMe = m.usertype == 0;
             this.messages.push(
-              {id: m.mid, body: m.message, userName: m.uname, time: m.time, me: isMe}
+              {id: m.mid, body: m.message, userName: m.uname, time: m.time, me: isMe, rawTime: m.rawTime}
             );
           });
           this.sessionId = res.id;
@@ -370,7 +386,7 @@ export class ConversationComponent implements OnInit, AfterViewChecked {
           res.messages.forEach(m => {
             const isMe = m.userId == this.userDetail.id;
             this.messages.push(
-              {id: m.mid, body: m.message, userName: m.uname, time: m.time, me: isMe}
+              {id: m.mid, body: m.message, userName: m.uname, time: m.time, me: isMe, rawTime: m.rawTime, date: m.date}
             );
           });
 
@@ -390,7 +406,7 @@ export class ConversationComponent implements OnInit, AfterViewChecked {
             res.messages.forEach(m => {
               const isMe = m.userId == this.userDetail.id;
               this.messages.push(
-                {id: m.mid, body: m.message, userName: m.uname, time: m.time, me: isMe}
+                {id: m.mid, body: m.message, userName: m.uname, time: m.time, me: isMe, rawTime: m.rawTime, date: m.date}
               );
             });
   
@@ -410,7 +426,7 @@ export class ConversationComponent implements OnInit, AfterViewChecked {
           filterMessages.forEach(m => {
             const isMe = m.usertype == 0;
             this.messages.push(
-              {id: m.mid, body: m.message, userName: m.uname, time: m.time, me: isMe}
+              {id: m.mid, body: m.message, userName: m.uname, time: m.time, me: isMe, rawTime: m.rawTime, date: m.date}
             );
           });
           this.sessionId = res.id;
@@ -490,6 +506,14 @@ export class ConversationComponent implements OnInit, AfterViewChecked {
     this.replyMessage = data.message;
     this.replyUserName = data.name;
     this.parentMessageId = data.id;
+    this.messageInput.nativeElement.focus();
+  }
+
+  nullReplyMessage(){
+    this.replying = false;
+    this.replyMessage = '';
+    this.replyUserName = '';
+    this.parentMessageId = 0;
   }
 
 }

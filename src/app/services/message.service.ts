@@ -2,7 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { environment } from 'src/environments/environment';
 import { AuthService } from './auth.service';
-import { Observable } from 'rxjs';
+import { map, Observable } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
@@ -50,20 +50,44 @@ export class MessageService {
       from_user_id: fromUserId,
       user_one_id: user_one_id,
       user_two_id: user_two_id
-    });
+    }).pipe( map((res: any) => {
+      (res.messages as any[]).forEach(m => {
+        let date = new Date(m.time);
+        m.time = date;
+        m.date = `${date.getMonth()}/${date.getDate()}/${date.getFullYear()}`;
+        m.rawTime = `${date.getMonth()}/${date.getDate()}/${date.getFullYear()} ${this.getTimeWithPmAM(date)}`
+      });
+      return res;
+    }));
   }
 
   sessionMessages(user_one_id: number, user_two_id: number): Observable<any>{
     return this.http.post(`${this.api}sessionMessages`, {
       user_one_id: user_one_id,
       user_two_id: user_two_id
-    });
+    }).pipe( map((res: any) => {
+      (res.messages as any[]).forEach(m => {
+        let date = new Date(m.time);
+        m.time = date;
+        m.date = `${date.getMonth()}/${date.getDate()}/${date.getFullYear()}`;
+        m.rawTime = `${date.getMonth()}/${date.getDate()}/${date.getFullYear()} ${this.getTimeWithPmAM(date)}`;
+      });
+      return res;
+    }));
   }
 
   groupMessages(groupId: number): Observable<{messages: any[]}>{
     return this.http.post<{messages: any}>(`${this.api}groupMessages`, {
       groupId: groupId,
-    });
+    }).pipe( map((res: any) => {
+      (res.messages as any[]).forEach(m => {
+        let date = new Date(m.time);
+        m.time = date;
+        m.date = `${date.getMonth()}/${date.getDate()}/${date.getFullYear()}`;
+        m.rawTime = `${date.getMonth()}/${date.getDate()}/${date.getFullYear()} ${this.getTimeWithPmAM(date)}`
+      });
+      return res;
+    }));
   }
 
   groupMessagesWithChannel(groupId: number, userIds: number[], fromUserId: number): Observable<{messages: any[]}>{
@@ -71,6 +95,13 @@ export class MessageService {
       groupId: groupId,
       userIds: userIds,
       fromUserId: fromUserId
+    });
+  }
+
+  getTimeWithPmAM(date: Date){
+    return date.toLocaleTimeString('en-US', {
+      hour: '2-digit',
+      minute: '2-digit',
     });
   }
 }
