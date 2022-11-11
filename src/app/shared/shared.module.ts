@@ -8,6 +8,8 @@ import { ChatSidebarComponent } from './chat-sidebar/chat-sidebar.component';
 import { PickerModule } from '@ctrl/ngx-emoji-mart';
 import { IconModule } from '@visurel/iconify-angular';
 import { ReplyMessageComponent } from './reply-message/reply-message.component';
+import { DirectMessageItemComponent } from './direct-message-item/direct-message-item.component';
+import { ReplyMessageItemComponent } from './reply-message-item/reply-message-item.component';
 
 
 
@@ -16,7 +18,9 @@ import { ReplyMessageComponent } from './reply-message/reply-message.component';
     LoaderComponent,
     ConversationComponent,
     ChatSidebarComponent,
-    ReplyMessageComponent
+    ReplyMessageComponent,
+    DirectMessageItemComponent,
+    ReplyMessageItemComponent
   ],
   imports: [
     CommonModule,

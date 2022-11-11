@@ -11,7 +11,7 @@
     flex-basis: 657px;
     gap: 8px;
     overflow-y: auto;
-    background: #F5F5FA;
+    background: #FFFFFF;
     display: flex;
     flex-direction: column;
   }
@@ -76,8 +76,8 @@
     position: relative;
     font-size: 14px;
     line-height: 21px;
-    color: #1C1D21;
-    background-color: white;
+    color: black;
+    background: linear-gradient(0deg, rgba(244, 190, 94, 0.1), rgba(244, 190, 94, 0.1)), #FFFFFF;
     min-width: 54px;
     border-radius: 18.5px 18.5px 18.5px 0px;
   }
@@ -120,9 +120,9 @@
     order: 2;
   }
   .message.me .message-content .content{
-    color: white;
+    color: #252631;
     border-radius: 17px 17px 0px 17px;
-    background: #5E81F4;
+    background: linear-gradient(0deg, rgba(94, 129, 244, 0.4), rgba(94, 129, 244, 0.4)), #FFFFFF;
   }
 
   .messenger .body.white-bg{

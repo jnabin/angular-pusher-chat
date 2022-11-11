@@ -1,0 +1,98 @@
+.message-wrapper{
+    padding: 10px 15px;
+    background: linear-gradient(0deg, rgba(244, 190, 94, 0.1), rgba(244, 190, 94, 0.1)), #FFFFFF;
+    border-radius: 12px;
+}
+
+.message-wrapper.me{
+    background: linear-gradient(0deg, rgba(94, 129, 244, 0.4), rgba(94, 129, 244, 0.4)), #FFFFFF;
+}
+
+.current-message-detail{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex: 1;
+    gap: 15px;
+}
+
+.current-message-detail .sender{
+    width: 30px;
+    height: 30px;
+    display: inline-block;
+    text-transform: uppercase;
+    border-radius: 50%;
+    color: white;
+    background-color: #5E81F4;
+    line-height: 30px;
+    font-size: 16px;
+    text-align: center;
+}
+
+.core-info{
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.core-info .sender-name, .reply-to-name{
+    font-weight: 900;
+    font-size: 14px;
+    line-height: 17px;
+    color: #000000;
+}
+
+.core-info .time{
+    font-weight: 400;
+    font-size: 12px;
+    line-height: 14px;
+    color: rgba(0, 0, 0, 0.6);
+}
+
+.reply-to-details{
+    cursor: pointer;
+    margin-left: 15px;
+    margin-top: 12px;
+    margin-bottom: 12px;
+    border-left: 4px solid rgba(0, 0, 0, 0.1);
+    padding: 5px 10px;
+}
+
+.reply-to-details div:first-child{
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.reply-to-user{
+    width: 20px !important;
+    height: 20px !important;
+    line-height: 20px;
+    font-size: 12px;
+    display: inline-block;
+    text-transform: uppercase;
+    border-radius: 50%;
+    color: white;
+    background-color: #5E81F4;
+    text-align: center;
+}
+
+.reply-to-name{
+    font-size: 15px;
+    line-height: 18px;
+}
+
+.reply-message-content{
+    margin-top: 7px;
+    font-weight: 400;
+    font-size: 15px;
+    line-height: 18px;
+    color: #000000;
+}
+
+.current-message-content{
+    font-weight: 400;
+    font-size: 15px;
+    line-height: 18px;
+    color: #000000;
+}

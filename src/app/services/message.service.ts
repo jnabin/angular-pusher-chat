@@ -15,11 +15,11 @@ export class MessageService {
   sendMessage(fromUserId: number, toUserId: number, message: string, sessionId: number, username: string, chanelName: string, groupChatId: number, isReply: boolean, parentMessageId: any): Observable<any>{
     let messageType = '';
     if(isReply) {
-      messageType = 'reply'
+      messageType = 'reply';
     } else {
       parentMessageId = null;
     }
-
+    
     return this.http.post(`${this.api}messages`, {
       fromUserId: fromUserId,
       toUserId: toUserId,

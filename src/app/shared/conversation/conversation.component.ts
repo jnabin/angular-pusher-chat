@@ -297,11 +297,22 @@ export class ConversationComponent implements OnInit, AfterViewChecked {
   }
 
   subscribeToRequestedChanel(privateChannel: any){
-    privateChannel.bind( 'message', (data: {fromUserId: number, toUserId: number, message: string, userName: string}) => {
+    privateChannel.bind( 'message', (data: any) => {
       if(data) {
-        let obj = {id: this.messages.length, body: data.message, userName: data.userName[0], date: this.getOnlyDate(new Date()), time: new Date(), rawTime: this.getRawDate(new Date()), me: data.fromUserId == this.userDetail.id};
+        let obj = {
+          id: this.messages.length, 
+          body: data.message, 
+          userName: data.userName[0], 
+          date: this.getOnlyDate(new Date()), 
+          time: new Date(), 
+          rawTime: this.getRawDate(new Date()), 
+          me: data.fromUserId == this.userDetail.id,
+          isReply: data.messageType == 'reply',
+          parentMessageId: data.parentMessageId,
+          parentMessage: data.messageType == 'reply' ? this.messages.find(x => x.id == data.parentMessageId).body : '',
+          parentMessageUser: data.messageType == 'reply' ? this.messages.find(x => x.id == data.parentMessageId).userName : ''
+        };
         this.messages = this.addToArray(this.messages, obj);
-        console.log(this.messages);
       }
     });
 
@@ -367,9 +378,7 @@ export class ConversationComponent implements OnInit, AfterViewChecked {
           let filterMessages = (res.messages as any[]).filter(x => x.userid == this.userDetail.id);
           filterMessages.forEach(m => {
             const isMe = m.usertype == 0;
-            this.messages.push(
-              {id: m.mid, body: m.message, userName: m.uname, time: m.time, me: isMe, rawTime: m.rawTime}
-            );
+            this.insertMessage(m, isMe);
           });
           this.sessionId = res.id;
           this.closeConversation = false;
@@ -385,9 +394,7 @@ export class ConversationComponent implements OnInit, AfterViewChecked {
         if (res) {
           res.messages.forEach(m => {
             const isMe = m.userId == this.userDetail.id;
-            this.messages.push(
-              {id: m.mid, body: m.message, userName: m.uname, time: m.time, me: isMe, rawTime: m.rawTime, date: m.date}
-            );
+            this.insertMessage(m, isMe);
           });
 
           this.closeConversation = false;
@@ -405,9 +412,7 @@ export class ConversationComponent implements OnInit, AfterViewChecked {
           if (res) {
             res.messages.forEach(m => {
               const isMe = m.userId == this.userDetail.id;
-              this.messages.push(
-                {id: m.mid, body: m.message, userName: m.uname, time: m.time, me: isMe, rawTime: m.rawTime, date: m.date}
-              );
+              this.insertMessage(m, isMe);
             });
   
             this.closeConversation = false;
@@ -425,9 +430,7 @@ export class ConversationComponent implements OnInit, AfterViewChecked {
           let filterMessages = (res.messages as any[]).filter(x => x.userid == this.userDetail.id);
           filterMessages.forEach(m => {
             const isMe = m.usertype == 0;
-            this.messages.push(
-              {id: m.mid, body: m.message, userName: m.uname, time: m.time, me: isMe, rawTime: m.rawTime, date: m.date}
-            );
+            this.insertMessage(m, isMe);
           });
           this.sessionId = res.id;
           this.closeConversation = false;
@@ -503,8 +506,8 @@ export class ConversationComponent implements OnInit, AfterViewChecked {
 
   replayProcess(data: any){
     this.replying = true;
-    this.replyMessage = data.message;
-    this.replyUserName = data.name;
+    this.replyMessage = data.body;
+    this.replyUserName = data.userName;
     this.parentMessageId = data.id;
     this.messageInput.nativeElement.focus();
   }
@@ -514,6 +517,28 @@ export class ConversationComponent implements OnInit, AfterViewChecked {
     this.replyMessage = '';
     this.replyUserName = '';
     this.parentMessageId = 0;
+    this.messageContent = '';
+  }
+
+  insertMessage(data: any, isMe: boolean) {
+    let mObj = this.getMessageObj(data, isMe)
+    this.messages.push(mObj);
+  }
+
+  getMessageObj(data: any, isMe: boolean) {
+    return {
+      id: data.mid, 
+      body: data.message, 
+      userName: data.uname, 
+      time: data.time, 
+      me: isMe, 
+      rawTime: data.rawTime, 
+      date: data.date,
+      isReply: data.messageType == 'reply',
+      parentMessageId: data.parentMessageId,
+      parentMessage: data.messageType == 'reply' ? this.messages.find(x => x.id == data.parentMessageId).body : '',
+      parentMessageUser: data.messageType == 'reply' ? this.messages.find(x => x.id == data.parentMessageId).userName : ''
+    };
   }
 
 }

@@ -31,30 +31,35 @@
           <div class="date-value">{{message.time | date:'longDate'}}</div>
           <div class="line"></div>
         </div>
-        <div class="message-content">
-          <div class="image align-self-center">
-            <span class="user-title">{{message.userName[0]}}</span>
-          </div>
-          <div class="content" [ngClass]="{'gray-content': fromConversation}">
-            <div class="options">
-              <span class="logo-wrapper" (click)="replayProcess({message: message.body, name: message.userName})">
-                <span class="iconify me-3" data-icon="fa-solid:reply"></span>
-              </span>
-              <span class="logo-wrapper">
-                <span class="iconify" data-icon="ant-design:edit-filled"></span>
-              </span>
+        <ng-container *ngIf="!message.isReply; else replySection;">
+          <div class="message-content">
+            <div class="image align-self-center">
+              <span class="user-title">{{message.userName[0]}}</span>
             </div>
-            {{message.body}}
-            <img *ngIf="message.image" [src]="message.image" alt="" srcset="">
+            <div class="content" [ngClass]="{'gray-content': fromConversation}">
+              <div class="options">
+                <span class="logo-wrapper" (click)="replayProcess(message)">
+                  <span class="iconify me-3" data-icon="fa-solid:reply"></span>
+                </span>
+                <span class="logo-wrapper">
+                  <span class="iconify" data-icon="ant-design:edit-filled"></span>
+                </span>
+              </div>
+              {{message.body}}
+              <img *ngIf="message.image" [src]="message.image" alt="" srcset="">
+            </div>
           </div>
-        </div>
-        <div class="time" [hidden]="i < messages.length-1 && message.me == messages[i+1].me && message.rawTime == messages[i+1].rawTime">
-          {{message.time | date:'shortTime'}}
-        </div>
-        <ng-template #rawTime>
-          <div class="time">
-            {{message.time | date:'medium'}}
+          <div class="time" [hidden]="i < messages.length-1 && message.me == messages[i+1].me && message.rawTime == messages[i+1].rawTime">
+            {{message.time | date:'shortTime'}}
           </div>
+          <ng-template #rawTime>
+            <div class="time">
+              {{message.time | date:'medium'}}
+            </div>
+          </ng-template>
+        </ng-container>
+        <ng-template #replySection>
+          <app-reply-message-item [message]="message"></app-reply-message-item>
         </ng-template>
       </div>
     </div>

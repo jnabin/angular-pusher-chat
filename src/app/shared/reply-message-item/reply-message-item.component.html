@@ -1,0 +1,24 @@
+<div class="message-wrapper">
+    <div class="current-message-detail">
+        <div class="core-info">
+            <span class="sender">{{message.userName[0] | titlecase}}</span>
+            <span class="sender-name">{{message.userName | titlecase}}</span>
+            <span class="time" style="padding-left: 1px;">{{message.time | date:'shortTime'}}</span>
+        </div>
+        <div>
+            <span class="iconify" data-icon="bi:three-dots-vertical"></span>
+        </div>
+    </div>
+    <div class="reply-to-details">
+        <div>
+            <span class="reply-to-user">{{message.parentMessageUser[0] | titlecase}}</span>
+            <span class="reply-to-name">{{message.parentMessageUser | titlecase}}</span>
+        </div>
+        <div class="reply-message-content">
+            {{message.parentMessage}}
+        </div>
+    </div>
+    <div class="current-message-content">
+        {{message.body}}
+    </div>
+</div>
