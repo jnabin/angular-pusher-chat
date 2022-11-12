@@ -1,24 +1,37 @@
-<div class="message-wrapper">
-    <div class="current-message-detail">
-        <div class="core-info">
-            <span class="sender">{{message.userName[0] | titlecase}}</span>
-            <span class="sender-name">{{message.userName | titlecase}}</span>
-            <span class="time" style="padding-left: 1px;">{{message.time | date:'shortTime'}}</span>
+<div class="main-wrapper">
+    <div class="message-wrapper">
+        <div class="options">
+            <span class="logo-wrapper" (click)="proceedReply.emit('Replying')">
+              <span class="iconify" data-icon="fa-solid:reply"></span>
+            </span>
+            <span *ngIf="message.me" class="logo-wrapper" (click)="proceedReply.emit('Editing')">
+              <span class="iconify" data-icon="ant-design:edit-filled"></span>
+            </span>
+          </div>
+        <div class="current-message-detail">
+            <div class="core-info">
+                <span class="sender">{{message.userName[0] | titlecase}}</span>
+                <span class="sender-name">{{message.userName | titlecase}}</span>
+                <span class="time" style="padding-left: 1px;">{{message.time | date:'shortTime'}}</span>
+            </div>
+            <div>
+                <span class="iconify" data-icon="bi:three-dots-vertical"></span>
+            </div>
         </div>
-        <div>
-            <span class="iconify" data-icon="bi:three-dots-vertical"></span>
+        <div class="reply-to-details" (click)="scrollTo.emit()">
+            <div>
+                <span class="reply-to-user">{{message.parentMessageUser[0] | titlecase}}</span>
+                <span class="reply-to-name">{{message.parentMessageUser | titlecase}}</span>
+            </div>
+            <div class="reply-message-content">
+                {{message.parentMessage}}
+            </div>
+        </div>
+        <div class="current-message-content">
+            {{message.body}}
         </div>
     </div>
-    <div class="reply-to-details" (click)="scrollTo.emit()">
-        <div>
-            <span class="reply-to-user">{{message.parentMessageUser[0] | titlecase}}</span>
-            <span class="reply-to-name">{{message.parentMessageUser | titlecase}}</span>
-        </div>
-        <div class="reply-message-content">
-            {{message.parentMessage}}
-        </div>
-    </div>
-    <div class="current-message-content">
-        {{message.body}}
+    <div class="edit-symbol" [class.last-order]="message.me" *ngIf="message.isEdited">
+        <span class="iconify" data-icon="fluent:edit-32-regular"></span>
     </div>
 </div>

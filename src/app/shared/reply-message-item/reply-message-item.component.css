@@ -1,8 +1,46 @@
+.main-wrapper{
+    display: flex;
+    flex: 1;
+    gap: 8px;
+    align-items: center;
+}
 .message-wrapper{
+    flex-grow: 1;
     padding: 10px 15px;
     background: linear-gradient(0deg, rgba(244, 190, 94, 0.1), rgba(244, 190, 94, 0.1)), #FFFFFF;
     border-radius: 12px;
+    position: relative;
 }
+
+.message-wrapper .options{
+    position: absolute;
+    background-color: gray;
+    color: white;
+    border-radius: 10px;
+    padding: 1px 7px;
+    top: -15px;
+    right: -7px;
+    display: none;
+}
+
+.message-wrapper:hover .options {
+    display: flex;
+    gap: 13px;
+    align-items: center;
+}
+
+.edit-symbol{
+    order: 1;
+}
+
+.edit-symbol.last-order{
+    order: -1;
+}
+
+
+.logo-wrapper{
+    cursor: pointer;
+  }
 
 .message-wrapper.me{
     background: linear-gradient(0deg, rgba(94, 129, 244, 0.4), rgba(94, 129, 244, 0.4)), #FFFFFF;

@@ -90,6 +90,10 @@ export class MessageService {
     }));
   }
 
+  updateMessage(mid: number, message: string, channelName: string): Observable<any>{
+    return this.http.put(`${this.api}messages`, {message: message, mid: mid, chanelName: channelName});
+  }
+
   groupMessagesWithChannel(groupId: number, userIds: number[], fromUserId: number): Observable<{messages: any[]}>{
     return this.http.post<{messages: any}>(`${this.api}groupMessagesWithChannel`, {
       groupId: groupId,

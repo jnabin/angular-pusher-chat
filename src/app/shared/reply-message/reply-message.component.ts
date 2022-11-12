@@ -10,6 +10,7 @@ export class ReplyMessageComponent implements OnInit {
 
   @Input() replyUserName: string = '';
   @Input() replyMessage: string = '';
+  @Input() title: string = '';
 
   @Output() cancel: EventEmitter<any> = new EventEmitter();
 

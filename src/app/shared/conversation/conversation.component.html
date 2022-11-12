@@ -38,15 +38,18 @@
             </div>
             <div class="content" [ngClass]="{'gray-content': fromConversation}">
               <div class="options">
-                <span class="logo-wrapper" (click)="replayProcess(message)">
-                  <span class="iconify me-3" data-icon="fa-solid:reply"></span>
+                <span class="logo-wrapper" (click)="replayProcess(message, 'Replying')">
+                  <span class="iconify" data-icon="fa-solid:reply"></span>
                 </span>
-                <span class="logo-wrapper">
+                <span *ngIf="message.me" class="logo-wrapper" (click)="replayProcess(message, 'Editing')">
                   <span class="iconify" data-icon="ant-design:edit-filled"></span>
                 </span>
               </div>
               {{message.body}}
               <img *ngIf="message.image" [src]="message.image" alt="" srcset="">
+            </div>
+            <div class="edit-symbol" [class.last-order]="message.me" *ngIf="message.isEdited">
+              <span class="iconify" data-icon="fluent:edit-32-regular"></span>
             </div>
           </div>
           <div class="time" [hidden]="i < messages.length-1 && message.me == messages[i+1].me && message.rawTime == messages[i+1].rawTime">
@@ -60,7 +63,8 @@
         </ng-container>
         <ng-template #replySection>
           <app-reply-message-item [message]="message"
-                                  (scrollTo)="scrollTo('message'+message.parentMessageId)">
+                                  (scrollTo)="scrollTo('message'+message.parentMessageId)"
+                                  (proceedReply)="replayProcess(message, $event)">
 
           </app-reply-message-item>
         </ng-template>
@@ -70,6 +74,7 @@
       <div class="reply-section" *ngIf="replying">
         <app-reply-message [replyUserName]="replyUserName" 
                            [replyMessage]="replyMessage"
+                           [title]="title"
                            (cancel)="replying = false">
         </app-reply-message>
       </div>

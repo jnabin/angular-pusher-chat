@@ -20,6 +20,7 @@ export class ConversationComponent implements OnInit, AfterViewInit {
   messages: any[] = [];
   replying = false;
   replyUserName = '';
+  title = '';
   replyMessage = '';
   parentMessageId = 0;
   groupChatDialogRef!: MatDialogRef<any>;
@@ -224,6 +225,19 @@ export class ConversationComponent implements OnInit, AfterViewInit {
     });
   }
 
+  editMessage() {
+    this.toggleEmojiPicker = false;
+    if(this.messageContent.length == 0 && this.imageUrl == null) return;
+
+    this.messageService.updateMessage(this.parentMessageId, this.messageContent, this.ChannelName).subscribe(res => {
+      
+      this.nullMessageContent();
+    }, err => {
+      console.log(err);
+      this.nullMessageContent();
+    })
+  }
+
   nullMessageContent() {
     this.nullReplyMessage();
     this.messageContent = '';
@@ -245,7 +259,11 @@ export class ConversationComponent implements OnInit, AfterViewInit {
       this.messageContent += '\n';
     } else if (event.key === 'Enter') {
       event.preventDefault();
-      this.sendMessage();
+      if(this.title == 'Editing') {
+        this.editMessage();
+      } else {
+        this.sendMessage();
+      }
     }
   }
 
@@ -310,10 +328,17 @@ export class ConversationComponent implements OnInit, AfterViewInit {
           isReply: data.messageType == 'reply',
           parentMessageId: data.parentMessageId,
           parentMessage: data.messageType == 'reply' ? this.messages.find(x => x.id == data.parentMessageId).body : '',
-          parentMessageUser: data.messageType == 'reply' ? this.messages.find(x => x.id == data.parentMessageId).userName : ''
+          parentMessageUser: data.messageType == 'reply' ? this.messages.find(x => x.id == data.parentMessageId).userName : '',
+          isEdited: false
         };
         this.messages = this.addToArray(this.messages, obj);
       }
+    });
+
+    privateChannel.bind('edit-message', (data: any) => {
+      let message = this.messages.find(x => x.id == data.mid);
+      message.isEdited = true;
+      message.body = data.updatedMessage;
     });
 
     privateChannel.bind( 'user_typing', (data: {username: string, userId: number}) => {
@@ -334,6 +359,7 @@ export class ConversationComponent implements OnInit, AfterViewInit {
     this.pusher.unsubscribe(dto?.chanelName as string);
     dto?.chanel.unbind("message");
     dto?.chanel.unbind("user_typing");
+    dto?.chanel.unbind("edit-message");
     let index = this.privateChannels.indexOf(dto);
     this.privateChannels.splice(index, 1);
   }
@@ -351,12 +377,12 @@ export class ConversationComponent implements OnInit, AfterViewInit {
     this.subscribeToRequestedChanel(privateChannel);
   }
 
-  subscribeManually(data:any) {
-    let channelName = data.isGroup ? `private-group-chat-${data.id}` : `private-chat-${data.id}-${this.userDetail.id}`;
-    let privateChannel = this.pusher.subscribe(channelName);
-    this.privateChannels.push({chanel: privateChannel, groupId: data.isGroup ? data.id : 0, groupIds: [], userId: data.isGroup ? 0 : data.id, chanelName: channelName});
-    this.subscribeToRequestedChanel(privateChannel);
-  }
+  // subscribeManually(data:any) {
+  //   let channelName = data.isGroup ? `private-group-chat-${data.id}` : `private-chat-${data.id}-${this.userDetail.id}`;
+  //   let privateChannel = this.pusher.subscribe(channelName);
+  //   this.privateChannels.push({chanel: privateChannel, groupId: data.isGroup ? data.id : 0, groupIds: [], userId: data.isGroup ? 0 : data.id, chanelName: channelName});
+  //   this.subscribeToRequestedChanel(privateChannel);
+  // }
 
   openConversation(user: any) {
     user.newMessage = false;
@@ -512,11 +538,12 @@ export class ConversationComponent implements OnInit, AfterViewInit {
     return true;
   }
 
-  replayProcess(data: any){
+  replayProcess(data: any, title: string){
     this.replying = true;
     this.replyMessage = data.body;
     this.replyUserName = data.userName;
     this.parentMessageId = data.id;
+    this.title = title;
     this.messageInput.nativeElement.focus();
   }
 
@@ -525,6 +552,7 @@ export class ConversationComponent implements OnInit, AfterViewInit {
     this.replyMessage = '';
     this.replyUserName = '';
     this.parentMessageId = 0;
+    this.title = '';
     this.messageContent = '';
   }
 
@@ -545,7 +573,8 @@ export class ConversationComponent implements OnInit, AfterViewInit {
       isReply: data.messageType == 'reply',
       parentMessageId: data.parentMessageId,
       parentMessage: data.messageType == 'reply' ? this.messages.find(x => x.id == data.parentMessageId).body : '',
-      parentMessageUser: data.messageType == 'reply' ? this.messages.find(x => x.id == data.parentMessageId).userName : ''
+      parentMessageUser: data.messageType == 'reply' ? this.messages.find(x => x.id == data.parentMessageId).userName : '',
+      isEdited: data.isEdited == '1'
     };
   }
 
