@@ -1,4 +1,4 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 
 @Component({
   selector: 'app-reply-message-item',
@@ -7,6 +7,8 @@ import { Component, Input, OnInit } from '@angular/core';
 })
 export class ReplyMessageItemComponent implements OnInit {
   @Input() message: any;
+  @Output() scrollTo: EventEmitter<any> = new EventEmitter();
+  
   constructor() { }
 
   ngOnInit(): void {

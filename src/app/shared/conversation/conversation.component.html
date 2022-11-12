@@ -25,7 +25,7 @@
   </div>
   <div class="messenger" [hidden]="closeConversation">
     <div #scrollMe class="body" [ngClass]="{'white-bg': fromConversation}">
-      <div class="message" [ngClass]="{me : message.me}" *ngFor="let message of messages; let i = index">
+      <div #messageList id="{{'message'+message.id}}" class="message" [ngClass]="{me : message.me}" *ngFor="let message of messages; let i = index">
         <div class="message-date" [hidden]="(i < messages.length-1 && message.date != messages[i+1].date) || (i > 0 && message.date == messages[i-1].date)">
           <div class="line"></div>
           <div class="date-value">{{message.time | date:'longDate'}}</div>
@@ -59,7 +59,10 @@
           </ng-template>
         </ng-container>
         <ng-template #replySection>
-          <app-reply-message-item [message]="message"></app-reply-message-item>
+          <app-reply-message-item [message]="message"
+                                  (scrollTo)="scrollTo('message'+message.parentMessageId)">
+
+          </app-reply-message-item>
         </ng-template>
       </div>
     </div>

@@ -9,7 +9,7 @@
             <span class="iconify" data-icon="bi:three-dots-vertical"></span>
         </div>
     </div>
-    <div class="reply-to-details">
+    <div class="reply-to-details" (click)="scrollTo.emit()">
         <div>
             <span class="reply-to-user">{{message.parentMessageUser[0] | titlecase}}</span>
             <span class="reply-to-name">{{message.parentMessageUser | titlecase}}</span>

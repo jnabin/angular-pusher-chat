@@ -1,4 +1,4 @@
-import { AfterViewChecked, Component, ElementRef, Input, OnInit, TemplateRef, ViewChild } from '@angular/core';
+import { AfterViewChecked, AfterViewInit, Component, ElementRef, Input, OnInit, QueryList, TemplateRef, ViewChild, ViewChildren } from '@angular/core';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import Pusher, { Channel, PresenceChannel } from 'pusher-js';
 import { AuthService } from 'src/app/services/auth.service';
@@ -11,8 +11,9 @@ import { UserService } from 'src/app/services/user.service';
   templateUrl: './conversation.component.html',
   styleUrls: ['./conversation.component.css']
 })
-export class ConversationComponent implements OnInit, AfterViewChecked {
+export class ConversationComponent implements OnInit, AfterViewInit {
   @ViewChild('scrollMe') private myScrollContainer!: ElementRef;
+  @ViewChildren('messageList') messageList!: QueryList<any>;
   @ViewChild('playAudio') private playAudio!: ElementRef;
   @ViewChild('messageInput') messageInput!: ElementRef;
   
@@ -60,8 +61,11 @@ export class ConversationComponent implements OnInit, AfterViewChecked {
               private groupService: GroupService,
               private matDialog: MatDialog) { }
   
-  ngAfterViewChecked(): void {
+  ngAfterViewInit(): void {
     this.scrollToBottom();
+    this.messageList.changes.subscribe(res => {
+      this.scrollToBottom();
+    });
   }
 
   getProfilePhoto(myself: boolean): string {
@@ -118,7 +122,6 @@ export class ConversationComponent implements OnInit, AfterViewChecked {
     this.pusher.signin();
 
     const notifications = this.pusher.subscribe(`private-notifications-${this.userDetail.id}`);
-    console.log(`private-notifications-${this.userDetail.id}`);
     const forum: PresenceChannel = this.pusher.subscribe( 'presence-forum' ) as PresenceChannel;
 
     forum.bind(`new-message-to-${this.userDetail.id}`, (data: {fromUserId: number, message: string, isGroup: boolean, groupId: number}) => {
@@ -135,7 +138,6 @@ export class ConversationComponent implements OnInit, AfterViewChecked {
 
     forum.bind(`group-new-message`, (data: {fromUserId: number, message: string, isGroup: boolean, groupId: number}) => {
       if(data.isGroup) {
-        console.log(this.conversations);
         this.conversations.forEach(x => {
           if(x.id == data.groupId && x.isGroup && this.userDetail.id != data.fromUserId && this.opponentUserId != data.groupId) {
             x.newMessage = true;
@@ -147,7 +149,6 @@ export class ConversationComponent implements OnInit, AfterViewChecked {
     });
 
     forum.bind("pusher:subscription_succeeded", (members: any) => {
-      console.log(members);
       this.activeCount += members.count;
     
       members.each((member: any) => {
@@ -199,7 +200,6 @@ export class ConversationComponent implements OnInit, AfterViewChecked {
   startPrivateGroupChat( withUserIds: number[], channelName: string, groupId: number ) {  
     let privateChannel = this.pusher.subscribe( channelName );
     this.privateChannels.push({chanel: privateChannel, groupId: groupId, groupIds: withUserIds, userId: 0, chanelName: channelName});
-    console.log(this.privateChannels);
     this.subscribeToRequestedChanel(privateChannel);
   }
 
@@ -300,7 +300,7 @@ export class ConversationComponent implements OnInit, AfterViewChecked {
     privateChannel.bind( 'message', (data: any) => {
       if(data) {
         let obj = {
-          id: this.messages.length, 
+          id: data.messageId, 
           body: data.message, 
           userName: data.userName[0], 
           date: this.getOnlyDate(new Date()), 
@@ -317,7 +317,6 @@ export class ConversationComponent implements OnInit, AfterViewChecked {
     });
 
     privateChannel.bind( 'user_typing', (data: {username: string, userId: number}) => {
-
       if(data.userId !== this.userDetail.id) {
         (document.getElementById('typing-indicator') as any).innerHTML = data.username + ' is typing...';
 
@@ -374,7 +373,6 @@ export class ConversationComponent implements OnInit, AfterViewChecked {
       this.subscribeToOpenedConversation(user, false);
       this.messageService.sessionMessages(this.userDetail.id, this.opponentUserId).subscribe(res => {
         if (res) {
-          console.log(res);
           let filterMessages = (res.messages as any[]).filter(x => x.userid == this.userDetail.id);
           filterMessages.forEach(m => {
             const isMe = m.usertype == 0;
@@ -467,7 +465,9 @@ export class ConversationComponent implements OnInit, AfterViewChecked {
   scrollToBottom(): void {
     try {
         this.myScrollContainer.nativeElement.scrollTop = this.myScrollContainer.nativeElement.scrollHeight;
-    } catch(err) { }                 
+    } catch(err) {
+      console.log(err);
+     }                 
   }
 
   openGroupForm(template: TemplateRef<any>){
@@ -483,13 +483,11 @@ export class ConversationComponent implements OnInit, AfterViewChecked {
     const userIds = this.newGroupChat.users.filter(x => x.isSelected).map(x => x.id);
     this.groupService.createGroup(this.userDetail.id, userIds, this.newGroupChat.name).subscribe(res => {
       const name = this.newGroupChat.name;
-      //this.newGroupChat = {name: '', users: []};
       this.groupChatDialogRef.close();
       this.opponentUserId = res; 
       this.opponentChat = {name: name, id: res, isGroup: true}
       this.closeConversation = false;
       this.conversations.push({name: name, id: res, isGroup: true});
-      console.log(res);
     }, err => {
       console.log(err);
     });
@@ -539,6 +537,12 @@ export class ConversationComponent implements OnInit, AfterViewChecked {
       parentMessage: data.messageType == 'reply' ? this.messages.find(x => x.id == data.parentMessageId).body : '',
       parentMessageUser: data.messageType == 'reply' ? this.messages.find(x => x.id == data.parentMessageId).userName : ''
     };
+  }
+
+
+  scrollTo(id: string) {
+    const element =document.getElementById(id);
+    element?.scrollIntoView({behavior: "smooth", block: "end", inline: "nearest"});
   }
 
 }
