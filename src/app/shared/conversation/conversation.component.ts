@@ -507,7 +507,7 @@ export class ConversationComponent implements OnInit, AfterViewInit {
 
   openGroupForm(template: TemplateRef<any>){
     this.users.forEach(user => user.isSelected = false);
-    this.newGroupChat = {name: '', users: [...this.users, {name: this.userDetail.name, id: this.userDetail.id, isSelected: true}]};
+    this.newGroupChat = {name: '', users: [...this.users, {name: this.userDetail.name, id: this.userDetail.id, isSelected: true, disable: true}]};
     this.groupChatDialogRef = this.matDialog.open(template, {
       width: '600px',
       data: { groupChat: this.newGroupChat },

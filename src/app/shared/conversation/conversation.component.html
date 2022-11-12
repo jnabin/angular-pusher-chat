@@ -120,7 +120,7 @@
       <label for="exampleInputPassword1" class="form-label">Select Users</label>
       <ul>
         <li *ngFor="let user of data.groupChat.users">
-          <mat-checkbox [(ngModel)]="user.isSelected">
+          <mat-checkbox [(ngModel)]="user.isSelected" [disabled]="user.disable">
             {{user.name | titlecase}}
           </mat-checkbox>
         </li>
