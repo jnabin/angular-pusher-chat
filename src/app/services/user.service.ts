@@ -15,4 +15,8 @@ export class UserService {
     return this.http.get(`${this.api}users`);
   }
 
+  getUsersWithLatestMessage(forUserId: number){
+    return this.http.get(`${this.api}usersWithLatestMessage/${forUserId}`);
+  }
+
 }

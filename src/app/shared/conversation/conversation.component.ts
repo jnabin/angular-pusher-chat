@@ -87,13 +87,15 @@ export class ConversationComponent implements OnInit, AfterViewInit {
     }, err => {
       console.log(err);
     });
-    this.userService.getAllUsers().subscribe((res: any) => {
+    this.userService.getUsersWithLatestMessage(this.userDetail.id).subscribe((res: any) => {
       this.users = (res as any[]).filter(x => x.id != this.userDetail.id);
       this.users.forEach(user => {
         this.conversations.push({
           name: user.name,
           id: user.id,
-          isGroup: false
+          isGroup: false,
+          latestMessage: user.content,
+          time: user.time,
         });
       })
     }, err => {
@@ -387,7 +389,6 @@ export class ConversationComponent implements OnInit, AfterViewInit {
   openConversation(user: any) {
     user.newMessage = false;
     user.newGroup = false;
-    user.latestMessage = null;
     let id = user.id;
     if(this.opponentUserId == id && this.opponentChat.isGroup == user.isGroup) return;
     this.closeConversation = true;

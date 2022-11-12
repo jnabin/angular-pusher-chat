@@ -13,7 +13,7 @@
         <p style="margin-bottom: 2px;">
           <strong class="title-case">{{conversationItem?.name}}</strong>
           <span *ngIf="conversationItem.newMessage || conversationItem.newGroup" class="new-message"></span>
-          <span class="mute float-end">8:30</span>
+          <span class="mute float-end" *ngIf="conversationItem?.time">{{conversationItem?.time | date:'shortTime' }}</span>
         </p>
         <p *ngIf="conversationItem.latestMessage" class="mb-0 latest-message">
           {{conversationItem.latestMessage}}
