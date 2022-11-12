@@ -179,7 +179,7 @@ export class ConversationComponent implements OnInit, AfterViewInit {
       if( data.initiated_by === this.userDetail.id) {
         this.startPrivateGroupChat( data.chat_with, data.channel_name, data.groupId );
       } else if ((data.chat_with_ids as any[]).includes(this.userDetail.id)) {
-        this.conversations.push({name: data.groupName, id: data.groupId, isGroup: true, newGroup: true});
+        if(data.newGroup) this.conversations.push({name: data.groupName, id: data.groupId, isGroup: true, newGroup: true}); 
         this.privateChannels.push({chanel: null, groupId: data.groupId, groupIds: data.chat_with_ids, userId: 0, chanelName: data.channel_name});
         //this.startPrivateChat( data.initiated_by, data.channel_name );
       }
@@ -351,6 +351,13 @@ export class ConversationComponent implements OnInit, AfterViewInit {
     this.subscribeToRequestedChanel(privateChannel);
   }
 
+  subscribeManually(data:any) {
+    let channelName = data.isGroup ? `private-group-chat-${data.id}` : `private-chat-${data.id}-${this.userDetail.id}`;
+    let privateChannel = this.pusher.subscribe(channelName);
+    this.privateChannels.push({chanel: privateChannel, groupId: data.isGroup ? data.id : 0, groupIds: [], userId: data.isGroup ? 0 : data.id, chanelName: channelName});
+    this.subscribeToRequestedChanel(privateChannel);
+  }
+
   openConversation(user: any) {
     user.newMessage = false;
     user.newGroup = false;
@@ -368,7 +375,9 @@ export class ConversationComponent implements OnInit, AfterViewInit {
     this.messages = [];
     this.opponentUserId = id;
     this.opponentChat = user;
-
+    // if (this.privateChannels.length == 0) {
+    //   this.subscribeManually(user);
+    // }
     if(this.privateChannels.find(x => x.userId == id && x.groupId == 0) != null) {
       this.subscribeToOpenedConversation(user, false);
       this.messageService.sessionMessages(this.userDetail.id, this.opponentUserId).subscribe(res => {
@@ -486,6 +495,7 @@ export class ConversationComponent implements OnInit, AfterViewInit {
       this.groupChatDialogRef.close();
       this.opponentUserId = res; 
       this.opponentChat = {name: name, id: res, isGroup: true}
+      this.messages = [];
       this.closeConversation = false;
       this.conversations.push({name: name, id: res, isGroup: true});
     }, err => {
