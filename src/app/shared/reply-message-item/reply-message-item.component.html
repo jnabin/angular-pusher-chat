@@ -24,11 +24,43 @@
                 <span class="reply-to-name">{{message.parentMessageUser | titlecase}}</span>
             </div>
             <div class="reply-message-content">
-                {{message.parentMessage}}
+                <ng-container *ngIf="!message.parentMessageUrl || message.parentMessageUrl.length == 0 else parentfileContent">
+                    {{message.parentMessage}}
+                </ng-container>
+                <ng-template #parentfileContent>
+                <ng-container *ngIf="message.isParentImage">
+                    <img class="parentMessageImg" src="{{message.parentMessageUrl}}" alt="" srcset="">
+                </ng-container>
+                <ng-container *ngIf="!message.isParentImage">
+                    <span class="me-1" style="color: #252631;">
+                    <span class="iconify" data-icon="ic:baseline-file-download"></span>
+                    </span>
+    
+                    <a href="{{message.parentMessageUrl}}">
+                    {{message.parentMessageUrl?.slice(-28)}}
+                    </a>
+                </ng-container>
+                </ng-template>
             </div>
         </div>
         <div class="current-message-content">
-            {{message.body}}
+            <ng-container *ngIf="(message.fileUrl == null || message.fileUrl == '') else fileContent">
+                {{message.body}}
+              </ng-container>
+              <ng-template #fileContent>
+                <ng-container *ngIf="message.isImage">
+                  <img class="currentMessageImg" src="{{message.fileUrl}}" alt="" srcset="">
+                </ng-container>
+                <ng-container *ngIf="!message.isImage">
+                  <span class="me-1" style="color: #252631;">
+                    <span class="iconify" data-icon="ic:baseline-file-download"></span>
+                  </span>
+  
+                  <a href="{{message.fileUrl}}">
+                    {{message.fileUrl.slice(-28)}}
+                  </a>
+                </ng-container>
+              </ng-template>
         </div>
     </div>
     <div class="edit-symbol" [class.last-order]="message.me" *ngIf="message.isEdited">

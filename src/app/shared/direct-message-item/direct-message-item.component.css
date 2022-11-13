@@ -1,0 +1,118 @@
+
+
+  .message-date{
+    display: flex;
+    flex: 1;
+    gap: 20px;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    margin-bottom: 10px;
+  }
+
+  .message-date .line{
+    flex-grow: 1;
+    height: 1px;
+    background-color: #dcd9d9;
+  }
+
+  .message-date .date-value{
+    color: #969696;
+    font-size: 14px;
+  }
+
+  .time{
+    margin: 5px 0px;
+    padding-left: 32px;
+    font-size: 12px;
+    line-height: 18px;
+    color: #8181A5;
+  }
+  .message-content{
+    display: flex;
+    flex-direction: row;
+    gap: 8px;
+    align-items: center;
+  }
+
+  .message-content .user-title{
+    width: 30px;
+    height: 30px;
+    display: inline-block;
+    text-transform: uppercase;
+    border-radius: 50%;
+    color: white;
+    background-color: #5E81F4;
+    line-height: 30px;
+    font-size: 16px;
+    text-align: center;
+  }
+  .message-content .content{
+    white-space: pre-line;
+    width: calc(100% - 24px);
+    flex-wrap: 1;
+    padding: 10px 15px;
+    position: relative;
+    font-size: 14px;
+    line-height: 21px;
+    color: black;
+    background: linear-gradient(0deg, rgba(244, 190, 94, 0.1), rgba(244, 190, 94, 0.1)), #FFFFFF;
+    min-width: 54px;
+    border-radius: 18.5px 18.5px 18.5px 0px;
+  }
+
+  .message-content .content .options{
+    position: absolute;
+    background-color: gray;
+    color: white;
+    border-radius: 10px;
+    padding: 1px 7px;
+    top: -15px;
+    right: -7px;
+    display: none;
+  }
+
+  .message-content .content:hover .options{
+    display: flex;
+    gap: 13px;
+    align-items: center;
+  }
+
+  .message-content .content:hover .options .logo-wrapper{
+    cursor: pointer;
+  }
+
+  .content.gray-content{
+    background-color: #F6F6F6;
+  }
+
+  .content img{
+    max-width: 400px;
+  }
+ 
+  .time{
+    padding-right: 32px;
+  }
+
+  .message-content .image{
+    order: 2;
+  }
+ .message-content .content{
+    color: #252631;
+    border-radius: 17px 17px 0px 17px;
+    background: linear-gradient(0deg, rgba(94, 129, 244, 0.4), rgba(94, 129, 244, 0.4)), #FFFFFF;
+  }
+
+  .messenger .body.white-bg{
+    background-color: white;
+    flex-basis: calc(100vh - 120px);
+  }
+
+  .edit-symbol{
+    order: 1;
+  }
+
+  .edit-symbol.last-order{
+    order: -1;
+  }
+  

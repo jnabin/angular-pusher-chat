@@ -41,12 +41,27 @@
                 <span class="logo-wrapper" (click)="replayProcess(message, 'Replying')">
                   <span class="iconify" data-icon="fa-solid:reply"></span>
                 </span>
-                <span *ngIf="message.me" class="logo-wrapper" (click)="replayProcess(message, 'Editing')">
+                <span *ngIf="message.me && message.fileUrl == null" class="logo-wrapper" (click)="replayProcess(message, 'Editing')">
                   <span class="iconify" data-icon="ant-design:edit-filled"></span>
                 </span>
               </div>
-              {{message.body}}
-              <img *ngIf="message.image" [src]="message.image" alt="" srcset="">
+              <ng-container *ngIf="(message.fileUrl == null || message.fileUrl == '') else fileContent">
+                {{message.body}}
+              </ng-container>
+              <ng-template #fileContent>
+                <ng-container *ngIf="message.isImage">
+                  <img src="{{message.fileUrl}}" alt="" srcset="">
+                </ng-container>
+                <ng-container *ngIf="!message.isImage">
+                  <span class="me-1" style="color: #252631;">
+                    <span class="iconify" data-icon="ic:baseline-file-download"></span>
+                  </span>
+  
+                  <a href="{{message.fileUrl}}">
+                    {{message.fileUrl.slice(-28)}}
+                  </a>
+                </ng-container>
+              </ng-template>
             </div>
             <div class="edit-symbol" [class.last-order]="message.me" *ngIf="message.isEdited">
               <span class="iconify" data-icon="fluent:edit-32-regular"></span>
@@ -74,6 +89,7 @@
       <div class="reply-section" *ngIf="replying">
         <app-reply-message [replyUserName]="replyUserName" 
                            [replyMessage]="replyMessage"
+                           [replyMessageUrl]="replyMessageUrl"
                            [title]="title"
                            (cancel)="replying = false">
         </app-reply-message>
@@ -91,17 +107,17 @@
       >
       </emoji-mart>
       <div class="inputBox" (click)="toggleEmojiPicker = false">
-        <textarea placeholder="send message" #messageInput id="textarea1" (keyup)="publishTyping()" [(ngModel)]="messageContent" (keydown)="triggerFunction($event)"></textarea>
+        <textarea placeholder="Click to start typing.." #messageInput id="textarea1" (keyup)="publishTyping()" [(ngModel)]="messageContent" (keydown)="triggerFunction($event)"></textarea>
       </div>
       <div class="send-option align-self-center">
         <button class="pl-0">
-          <img (click)="toggleEmojiPicker = !toggleEmojiPicker" src="/assets/images/smile.svg" alt="" srcset="">
+          <span (click)="toggleEmojiPicker = !toggleEmojiPicker" class="iconify" data-icon="bi:emoji-smile"></span>
         </button>
         <button (click)="fileInput.click()">
-          <img (click)="toggleEmojiPicker = false" src="/assets/images/file.svg" alt="" srcset="">
+          <span (click)="toggleEmojiPicker = false" class="iconify" data-icon="gg:attachment"></span>
         </button>
-        <button class="pr-0" (click)="sendMessage()">
-          <img src="/assets/images/send-btn.svg" alt="" srcset="">
+        <button class="pr-0" class="send-btn" (click)="sendMessage()">
+          <span class="iconify" data-icon="fluent-mdl2:send"></span>
         </button>
       </div>
       </div>

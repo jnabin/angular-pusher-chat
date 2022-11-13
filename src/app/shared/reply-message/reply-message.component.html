@@ -1,7 +1,21 @@
 <div class="reply">
     <div class="replying">{{title | titlecase}}</div>
     <div class="username">{{replyUserName}}</div>
-    <div class="message">{{replyMessage}}</div>
+    <div class="message">
+        <ng-container *ngIf="replyMessageUrl == null || replyMessageUrl == ''">
+            {{replyMessage}}
+        </ng-container>
+        <ng-container *ngIf="replyMessageUrl">
+            <ng-container *ngIf="isImage">
+                <img src="{{replyMessageUrl}}" alt="" srcset="">
+              </ng-container>
+              <ng-container *ngIf="!isImage">
+                <a href="{{replyMessageUrl}}">
+                  {{replyMessageUrl.slice(-28)}}
+                </a>
+              </ng-container>
+        </ng-container>
+    </div>
 
     <div class="close" (click)="cancel.emit()">
         <span class="iconify" data-icon="akar-icons:cross"></span>

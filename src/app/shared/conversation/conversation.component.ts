@@ -1,10 +1,13 @@
+import { HttpEventType, HttpResponse } from '@angular/common/http';
 import { AfterViewChecked, AfterViewInit, Component, ElementRef, Input, OnInit, QueryList, TemplateRef, ViewChild, ViewChildren } from '@angular/core';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import Pusher, { Channel, PresenceChannel } from 'pusher-js';
 import { AuthService } from 'src/app/services/auth.service';
 import { GroupService } from 'src/app/services/group.service';
 import { MessageService } from 'src/app/services/message.service';
+import { UploadFileService } from 'src/app/services/upload-file.service';
 import { UserService } from 'src/app/services/user.service';
+import { environment } from 'src/environments/environment';
 
 @Component({
   selector: 'app-conversation',
@@ -21,7 +24,10 @@ export class ConversationComponent implements OnInit, AfterViewInit {
   replying = false;
   replyUserName = '';
   title = '';
+  progress = 0;
+  uploadMessage = '';
   replyMessage = '';
+  replyMessageUrl = '';
   parentMessageId = 0;
   groupChatDialogRef!: MatDialogRef<any>;
   newGroupChat!: {name: string, users: any[]}; 
@@ -60,7 +66,8 @@ export class ConversationComponent implements OnInit, AfterViewInit {
               private messageService: MessageService, 
               private userService: UserService,
               private groupService: GroupService,
-              private matDialog: MatDialog) { }
+              private matDialog: MatDialog,
+              private uploadService: UploadFileService) { }
   
   ngAfterViewInit(): void {
     this.scrollToBottom();
@@ -90,11 +97,12 @@ export class ConversationComponent implements OnInit, AfterViewInit {
     this.userService.getUsersWithLatestMessage(this.userDetail.id).subscribe((res: any) => {
       this.users = (res as any[]).filter(x => x.id != this.userDetail.id);
       this.users.forEach(user => {
+        let fileMessage =  user.fromUserId == this.userDetail.id ? 'you sent file' : 'attachment'; 
         this.conversations.push({
           name: user.name,
           id: user.id,
           isGroup: false,
-          latestMessage: user.content,
+          latestMessage: user.content?.length == 0 ? fileMessage : user.content,
           time: user.time,
         });
       })
@@ -132,7 +140,8 @@ export class ConversationComponent implements OnInit, AfterViewInit {
         this.conversations.forEach(x => {
           if(x.id == data.fromUserId && !x.isGroup && this.opponentUserId != data.fromUserId) {
             x.newMessage = true;
-            x.latestMessage = data.message;
+            let user = this.users.find(x => x.id == data.fromUserId);
+            x.latestMessage = data.message.length == 0 ? `${user.name} has sent file` : data.message;
             this.playAudio.nativeElement.click();
           }
         })
@@ -144,7 +153,8 @@ export class ConversationComponent implements OnInit, AfterViewInit {
         this.conversations.forEach(x => {
           if(x.id == data.groupId && x.isGroup && this.userDetail.id != data.fromUserId && this.opponentUserId != data.groupId) {
             x.newMessage = true;
-            x.latestMessage = data.message;
+            let user = this.users.find(x => x.id == data.fromUserId);
+            x.latestMessage = data.message.length == 0 ? `${user.name} has sent file` : data.message;
             this.playAudio.nativeElement.click();
           }
         })
@@ -206,7 +216,8 @@ export class ConversationComponent implements OnInit, AfterViewInit {
     this.subscribeToRequestedChanel(privateChannel);
   }
 
-  sendMessage() {
+  sendMessage(fileUrl = '') {
+    if(fileUrl.length > 0) this.messageContent = '';
     this.toggleEmojiPicker = false;
     if(this.messageContent.length == 0 && this.imageUrl == null) return;
     //this.botReplay(lastMessageId++);
@@ -219,7 +230,8 @@ export class ConversationComponent implements OnInit, AfterViewInit {
       this.ChannelName, 
       this.opponentUserId,
       this.replying,
-      this.parentMessageId).subscribe(res => {
+      this.parentMessageId,
+      fileUrl).subscribe(res => {
       this.nullMessageContent();
     }, err => {
       console.log(err);
@@ -279,13 +291,39 @@ export class ConversationComponent implements OnInit, AfterViewInit {
     if(!event.target.files[0] || event.target.files[0].length == 0) {
 			return;
 		}
+    this.uploadFile(event.target.files[0]);
     var reader = new FileReader();
 		reader.readAsDataURL(event.target.files[0]);
 
 		reader.onload = (_event) => {
 			this.imageUrl = reader.result;
-      this.sendMessage();
+      //this.sendMessage();
 		}
+  }
+
+  uploadFile(file: File) {
+    this.uploadService.upload(file).subscribe(
+      (event: any) => {
+        if (event.type === HttpEventType.UploadProgress) {
+          this.progress = Math.round(100 * event.loaded / event.total);
+        } else if (event instanceof HttpResponse) {
+          this.uploadMessage = event.body.message;
+          //this.fileInfos = this.uploadService.getFiles();
+          this.sendMessage(`${environment.baseUrl}files/${event.body.fileName}`);
+        }
+      },
+      (err: any) => {
+        console.log(err);
+        this.progress = 0;
+  
+        if (err.error && err.error.message) {
+          this.uploadMessage = err.error.message;
+        } else {
+          this.uploadMessage = 'Could not upload the file!';
+        }
+  
+      });
+  
   }
 
   publishTyping(){
@@ -319,6 +357,7 @@ export class ConversationComponent implements OnInit, AfterViewInit {
   subscribeToRequestedChanel(privateChannel: any){
     privateChannel.bind( 'message', (data: any) => {
       if(data) {
+        let parentMessage = data.messageType == 'reply' ? this.messages.find(x => x.id == data.parentMessageId) : null;
         let obj = {
           id: data.messageId, 
           body: data.message, 
@@ -329,9 +368,13 @@ export class ConversationComponent implements OnInit, AfterViewInit {
           me: data.fromUserId == this.userDetail.id,
           isReply: data.messageType == 'reply',
           parentMessageId: data.parentMessageId,
-          parentMessage: data.messageType == 'reply' ? this.messages.find(x => x.id == data.parentMessageId).body : '',
-          parentMessageUser: data.messageType == 'reply' ? this.messages.find(x => x.id == data.parentMessageId).userName : '',
-          isEdited: false
+          parentMessage: data.messageType == 'reply' ? parentMessage.body : '',
+          parentMessageUrl: data.messageType == 'reply' ? parentMessage.fileUrl : '',
+          parentMessageUser: data.messageType == 'reply' ? parentMessage.userName : '',
+          isEdited: false,
+          fileUrl: data.fileUrl,
+          isImage: this.isImageTypeUrl(data.fileUrl),
+          isParentImage: data.messageType == 'reply' ? this.isImageTypeUrl(parentMessage.fileUrl) : false
         };
         this.messages = this.addToArray(this.messages, obj);
       }
@@ -542,6 +585,7 @@ export class ConversationComponent implements OnInit, AfterViewInit {
   replayProcess(data: any, title: string){
     this.replying = true;
     this.replyMessage = data.body;
+    this.replyMessageUrl = data.fileUrl;
     this.replyUserName = data.userName;
     this.parentMessageId = data.id;
     this.title = title;
@@ -552,6 +596,7 @@ export class ConversationComponent implements OnInit, AfterViewInit {
     this.replying = false;
     this.replyMessage = '';
     this.replyUserName = '';
+    this.replyMessageUrl = '';
     this.parentMessageId = 0;
     this.title = '';
     this.messageContent = '';
@@ -563,6 +608,8 @@ export class ConversationComponent implements OnInit, AfterViewInit {
   }
 
   getMessageObj(data: any, isMe: boolean) {
+    let parentMessage = data.messageType == 'reply' ? this.messages.find(x => x.id == data.parentMessageId) : null;
+
     return {
       id: data.mid, 
       body: data.message, 
@@ -573,10 +620,25 @@ export class ConversationComponent implements OnInit, AfterViewInit {
       date: data.date,
       isReply: data.messageType == 'reply',
       parentMessageId: data.parentMessageId,
-      parentMessage: data.messageType == 'reply' ? this.messages.find(x => x.id == data.parentMessageId).body : '',
-      parentMessageUser: data.messageType == 'reply' ? this.messages.find(x => x.id == data.parentMessageId).userName : '',
-      isEdited: data.isEdited == '1'
+      parentMessage: data.messageType == 'reply' ? parentMessage.body : '',
+      parentMessageUrl: data.messageType == 'reply' ? parentMessage.fileUrl : '',
+      parentMessageUser: data.messageType == 'reply' ? parentMessage.userName : '',
+      isEdited: data.isEdited == '1',
+      fileUrl: data.fileUrl,
+      isImage: this.isImageTypeUrl(data.fileUrl),
+      isParentImage: data.messageType == 'reply' ? this.isImageTypeUrl(parentMessage.fileUrl) : false
     };
+  }
+
+
+  isImageTypeUrl(url: string): boolean {
+    return url != null && url.length >= 5 && 
+          (
+            url.slice(-5).toLowerCase().includes('.png') || 
+            url.slice(-5).toLowerCase().includes('.jpg') || 
+            url.slice(-5).toLowerCase().includes('.jpeg') || 
+            url.slice(-5).toLowerCase().includes('.gif')
+          );
   }
 
 

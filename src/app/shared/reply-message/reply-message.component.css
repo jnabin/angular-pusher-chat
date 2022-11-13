@@ -30,3 +30,7 @@
     right: 20px;
     cursor: pointer;
 }
+
+img{
+    max-width: 150px;
+}

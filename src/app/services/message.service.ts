@@ -12,7 +12,16 @@ export class MessageService {
 
   constructor(private http: HttpClient, private auth: AuthService) { }
 
-  sendMessage(fromUserId: number, toUserId: number, message: string, sessionId: number, username: string, chanelName: string, groupChatId: number, isReply: boolean, parentMessageId: any): Observable<any>{
+  sendMessage(fromUserId: number, 
+              toUserId: number, 
+              message: string, 
+              sessionId: number, 
+              username: string, 
+              chanelName: string, 
+              groupChatId: number, 
+              isReply: boolean, 
+              parentMessageId: any,
+              fileUrl: string): Observable<any>{
     let messageType = '';
     if(isReply) {
       messageType = 'reply';
@@ -29,7 +38,8 @@ export class MessageService {
       chanelName: chanelName,
       groupChatId: groupChatId,
       messageType: messageType,
-      parentMessageId: parentMessageId
+      parentMessageId: parentMessageId,
+      fileUrl: fileUrl
     });
   }
 

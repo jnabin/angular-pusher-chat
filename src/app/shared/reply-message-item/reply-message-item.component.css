@@ -134,3 +134,11 @@
     line-height: 18px;
     color: #000000;
 }
+
+.currentMessageImg{
+    max-width: 400px;
+}
+
+.parentMessageImg{
+    max-width: 100px;
+}
