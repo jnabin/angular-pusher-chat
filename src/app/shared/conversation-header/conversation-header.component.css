@@ -1,0 +1,78 @@
+.conversation-header{
+    height: 118px;
+    box-shadow: 0px 4px 7px rgba(0, 0, 0, 0.15);
+    padding: 15px 20px 10px 30px;
+}
+
+.chat-title-section{
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    font-weight: 900;
+    font-size: 16px;
+    line-height: 21px;
+    color: #252631;
+}
+
+.chat-title-section .star{
+    color: #8181A5;
+}
+
+.top-section{
+    text-align: end;
+}
+
+.top-section .option-dropdown{
+    color: #778CA2;
+    margin-left: 30px;
+}
+
+.top-section select{
+    font-weight: 700;
+    font-size: 16px;
+    line-height: 32px;
+    color: #8181A5;
+    border: none;
+    outline: none;
+}
+
+.other-infos{
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    margin-top: 10px;
+    margin-left: 22px;
+}
+
+.other-infos .group-members{
+    gap: 5px;
+    display: flex;
+}
+
+.member-section, .other-count{
+    background: rgba(94, 129, 244, 0.1);
+    border-radius: 10px;
+    padding: 0px 10px;
+}
+
+.other-infos .call-mail-options{
+    gap: 2px;
+    display: flex;
+}
+
+.other-infos .call-mail-options div{
+    background: rgba(94, 129, 244, 0.1);
+    color: #5E81F4;
+    padding: 5px;
+    border-radius: 10px;
+}
+
+.member-name{
+    font-size: 16px;
+    line-height: 24px;
+    color: #1C1D21;
+}
+
+.option-item{
+    padding: 10px;
+}

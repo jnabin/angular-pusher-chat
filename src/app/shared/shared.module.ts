@@ -10,6 +10,7 @@ import { IconModule } from '@visurel/iconify-angular';
 import { ReplyMessageComponent } from './reply-message/reply-message.component';
 import { DirectMessageItemComponent } from './direct-message-item/direct-message-item.component';
 import { ReplyMessageItemComponent } from './reply-message-item/reply-message-item.component';
+import { ConversationHeaderComponent } from './conversation-header/conversation-header.component';
 
 
 
@@ -20,7 +21,8 @@ import { ReplyMessageItemComponent } from './reply-message-item/reply-message-it
     ChatSidebarComponent,
     ReplyMessageComponent,
     DirectMessageItemComponent,
-    ReplyMessageItemComponent
+    ReplyMessageItemComponent,
+    ConversationHeaderComponent
   ],
   imports: [
     CommonModule,
@@ -34,7 +36,8 @@ import { ReplyMessageItemComponent } from './reply-message-item/reply-message-it
     ConversationComponent,
     ChatSidebarComponent,
     MaterialModule,
-    ReplyMessageComponent
+    ReplyMessageComponent,
+    ConversationHeaderComponent
   ]
 })
 export class SharedModule { }

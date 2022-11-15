@@ -23,7 +23,8 @@
 
     </app-chat-sidebar>
   </div>
-  <div class="messenger" [hidden]="closeConversation">
+  <div class="messenger" *ngIf="!closeConversation">
+    <app-conversation-header [chatTitle]="opponentChat.name"></app-conversation-header>
     <div #scrollMe class="body" [ngClass]="{'white-bg': fromConversation}">
       <div #messageList id="{{'message'+message.id}}" class="message" [ngClass]="{me : message.me}" *ngFor="let message of messages; let i = index">
         <div class="message-date" [hidden]="(i < messages.length-1 && message.date != messages[i+1].date) || (i > 0 && message.date == messages[i-1].date)">
@@ -41,7 +42,7 @@
                 <span class="logo-wrapper" (click)="replayProcess(message, 'Replying')">
                   <span class="iconify" data-icon="fa-solid:reply"></span>
                 </span>
-                <span *ngIf="message.me && message.fileUrl == null" class="logo-wrapper" (click)="replayProcess(message, 'Editing')">
+                <span *ngIf="message.me && (message.fileUrl == null || message.fileUrl == '')" class="logo-wrapper" (click)="replayProcess(message, 'Editing')">
                   <span class="iconify" data-icon="ant-design:edit-filled"></span>
                 </span>
               </div>
@@ -96,7 +97,7 @@
       </div>
       <div class="footer">
         <span id="typing-indicator"></span>
-      <input type="file" class="d-none" accept="image/*" #fileInput
+      <input type="file" class="d-none" #fileInput
           (change)="fileSelect($event)" />
       <emoji-mart
         (emojiClick)="addEmoji($event)"
@@ -110,8 +111,8 @@
         <textarea placeholder="Click to start typing.." #messageInput id="textarea1" (keyup)="publishTyping()" [(ngModel)]="messageContent" (keydown)="triggerFunction($event)"></textarea>
       </div>
       <div class="send-option align-self-center">
-        <button class="pl-0">
-          <span (click)="toggleEmojiPicker = !toggleEmojiPicker" class="iconify" data-icon="bi:emoji-smile"></span>
+        <button class="pl-0" (click)="toggleEmojiPicker = !toggleEmojiPicker">
+          <span class="iconify" data-icon="bi:emoji-smile"></span>
         </button>
         <button (click)="fileInput.click()">
           <span (click)="toggleEmojiPicker = false" class="iconify" data-icon="gg:attachment"></span>

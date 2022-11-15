@@ -13,22 +13,28 @@ export class MessageService {
   constructor(private http: HttpClient, private auth: AuthService) { }
 
   sendMessage(fromUserId: number, 
-              toUserId: number, 
+              toChatId: number, 
               message: string, 
               sessionId: number, 
               username: string, 
               chanelName: string, 
-              groupChatId: number, 
               isReply: boolean, 
               parentMessageId: any,
-              fileUrl: string): Observable<any>{
+              fileUrl: string,
+              isGroup: boolean): Observable<any>{
     let messageType = '';
     if(isReply) {
       messageType = 'reply';
     } else {
       parentMessageId = null;
     }
-    
+    let toUserId = null;
+    let toGroupId = null;
+    if(isGroup) {
+      toGroupId = toChatId;
+    } else {
+      toUserId = toChatId;
+    }
     return this.http.post(`${this.api}messages`, {
       fromUserId: fromUserId,
       toUserId: toUserId,
@@ -36,7 +42,7 @@ export class MessageService {
       sessionId: sessionId,
       username: username,
       chanelName: chanelName,
-      groupChatId: groupChatId,
+      groupChatId: toGroupId,
       messageType: messageType,
       parentMessageId: parentMessageId,
       fileUrl: fileUrl
@@ -44,7 +50,7 @@ export class MessageService {
   }
 
   publishUserTyping(username: string, fromUserId:number, user_one_id: number, user_two_id: number, chanelName: string): Observable<any>{
-    //console.log(chanelName);
+    console.log(chanelName);
     return this.http.post(`${this.api}userTyping`, {
       username: username,
       fromUserId: fromUserId,

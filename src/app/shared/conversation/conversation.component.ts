@@ -15,7 +15,12 @@ import { environment } from 'src/environments/environment';
   styleUrls: ['./conversation.component.css']
 })
 export class ConversationComponent implements OnInit, AfterViewInit {
-  @ViewChild('scrollMe') private myScrollContainer!: ElementRef;
+  private myScrollContainer!: ElementRef;
+  @ViewChild('scrollMe') set content(content: ElementRef) {
+    if(content) { 
+        this.myScrollContainer = content;
+    }
+  }
   @ViewChildren('messageList') messageList!: QueryList<any>;
   @ViewChild('playAudio') private playAudio!: ElementRef;
   @ViewChild('messageInput') messageInput!: ElementRef;
@@ -151,7 +156,8 @@ export class ConversationComponent implements OnInit, AfterViewInit {
     forum.bind(`group-new-message`, (data: {fromUserId: number, message: string, isGroup: boolean, groupId: number}) => {
       if(data.isGroup) {
         this.conversations.forEach(x => {
-          if(x.id == data.groupId && x.isGroup && this.userDetail.id != data.fromUserId && this.opponentUserId != data.groupId) {
+          if(x.id == data.groupId && x.isGroup && 
+            this.userDetail.id != data.fromUserId) {
             x.newMessage = true;
             let user = this.users.find(x => x.id == data.fromUserId);
             x.latestMessage = data.message.length == 0 ? `${user.name} has sent file` : data.message;
@@ -227,11 +233,12 @@ export class ConversationComponent implements OnInit, AfterViewInit {
       this.messageContent, 
       this.sessionId, 
       this.userDetail.name, 
-      this.ChannelName, 
-      this.opponentUserId,
+      this.ChannelName,
       this.replying,
       this.parentMessageId,
-      fileUrl).subscribe(res => {
+      fileUrl,
+      this.opponentChat.isGroup).subscribe(res => {
+        console.log(res);
       this.nullMessageContent();
     }, err => {
       console.log(err);
@@ -401,6 +408,7 @@ export class ConversationComponent implements OnInit, AfterViewInit {
   }
 
   unsubscribeChannel(dto: any) {
+    if(dto.chanel == null) return;
     this.pusher.unsubscribe(dto?.chanelName as string);
     dto?.chanel.unbind("message");
     dto?.chanel.unbind("user_typing");
@@ -435,13 +443,7 @@ export class ConversationComponent implements OnInit, AfterViewInit {
     let id = user.id;
     if(this.opponentUserId == id && this.opponentChat.isGroup == user.isGroup) return;
     this.closeConversation = true;
-    if(this.opponentUserId) {
-      let dto = this.privateChannels.find(x => x.userId == this.opponentUserId && x.groupId == 0);
-      let groupdto = this.privateChannels.find(x => x.groupId == this.opponentUserId && x.userId == 0);
-
-      if (dto)  this.unsubscribeChannel(dto);
-      if (groupdto) this.unsubscribeChannel(groupdto);
-    } 
+    this.checkExistingOpenChat();
     this.messages = [];
     this.opponentUserId = id;
     this.opponentChat = user;
@@ -455,7 +457,7 @@ export class ConversationComponent implements OnInit, AfterViewInit {
           let filterMessages = (res.messages as any[]).filter(x => x.userid == this.userDetail.id);
           filterMessages.forEach(m => {
             const isMe = m.usertype == 0;
-            this.insertMessage(m, isMe);
+            this.insertMessage(m, isMe, filterMessages);
           });
           this.sessionId = res.id;
           this.closeConversation = false;
@@ -471,7 +473,7 @@ export class ConversationComponent implements OnInit, AfterViewInit {
         if (res) {
           res.messages.forEach(m => {
             const isMe = m.userId == this.userDetail.id;
-            this.insertMessage(m, isMe);
+            this.insertMessage(m, isMe, res.messages);
           });
 
           this.closeConversation = false;
@@ -489,7 +491,7 @@ export class ConversationComponent implements OnInit, AfterViewInit {
           if (res) {
             res.messages.forEach(m => {
               const isMe = m.userId == this.userDetail.id;
-              this.insertMessage(m, isMe);
+              this.insertMessage(m, isMe, res.messages);
             });
   
             this.closeConversation = false;
@@ -507,7 +509,7 @@ export class ConversationComponent implements OnInit, AfterViewInit {
           let filterMessages = (res.messages as any[]).filter(x => x.userid == this.userDetail.id);
           filterMessages.forEach(m => {
             const isMe = m.usertype == 0;
-            this.insertMessage(m, isMe);
+            this.insertMessage(m, isMe, filterMessages);
           });
           this.sessionId = res.id;
           this.closeConversation = false;
@@ -558,16 +560,27 @@ export class ConversationComponent implements OnInit, AfterViewInit {
     })
   }
 
+  checkExistingOpenChat(){
+    if(this.opponentUserId) {
+      let dto = this.privateChannels.find(x => x.userId == this.opponentUserId && x.groupId == 0);
+      let groupdto = this.privateChannels.find(x => x.groupId == this.opponentUserId && x.userId == 0);
+      if (dto)  this.unsubscribeChannel(dto);
+      if (groupdto) this.unsubscribeChannel(groupdto);
+    } 
+  }
+
   createGroupChat() {
     const userIds = this.newGroupChat.users.filter(x => x.isSelected).map(x => x.id);
     this.groupService.createGroup(this.userDetail.id, userIds, this.newGroupChat.name).subscribe(res => {
-      const name = this.newGroupChat.name;
-      this.groupChatDialogRef.close();
-      this.opponentUserId = res; 
-      this.opponentChat = {name: name, id: res, isGroup: true}
-      this.messages = [];
-      this.closeConversation = false;
-      this.conversations.push({name: name, id: res, isGroup: true});
+    this.checkExistingOpenChat();
+    const name = this.newGroupChat.name;
+    this.groupChatDialogRef.close();
+    this.opponentUserId = res; 
+    this.opponentChat = {name: name, id: res, isGroup: true}
+    this.messages = [];
+    this.sessionId = null;
+    this.closeConversation = false;
+    this.conversations.push({name: name, id: res, isGroup: true});
     }, err => {
       console.log(err);
     });
@@ -602,13 +615,13 @@ export class ConversationComponent implements OnInit, AfterViewInit {
     this.messageContent = '';
   }
 
-  insertMessage(data: any, isMe: boolean) {
-    let mObj = this.getMessageObj(data, isMe)
+  insertMessage(data: any, isMe: boolean, messageList: any[]) {
+    let mObj = this.getMessageObj(data, isMe, messageList)
     this.messages.push(mObj);
   }
 
-  getMessageObj(data: any, isMe: boolean) {
-    let parentMessage = data.messageType == 'reply' ? this.messages.find(x => x.id == data.parentMessageId) : null;
+  getMessageObj(data: any, isMe: boolean, messageList: any[]) {
+    let parentMessage = data.messageType == 'reply' ? messageList.find(x => x.mid == data.parentMessageId) : null;
 
     return {
       id: data.mid, 
@@ -620,9 +633,9 @@ export class ConversationComponent implements OnInit, AfterViewInit {
       date: data.date,
       isReply: data.messageType == 'reply',
       parentMessageId: data.parentMessageId,
-      parentMessage: data.messageType == 'reply' ? parentMessage.body : '',
+      parentMessage: data.messageType == 'reply' ? parentMessage.message : '',
       parentMessageUrl: data.messageType == 'reply' ? parentMessage.fileUrl : '',
-      parentMessageUser: data.messageType == 'reply' ? parentMessage.userName : '',
+      parentMessageUser: data.messageType == 'reply' ? parentMessage.uname : '',
       isEdited: data.isEdited == '1',
       fileUrl: data.fileUrl,
       isImage: this.isImageTypeUrl(data.fileUrl),
