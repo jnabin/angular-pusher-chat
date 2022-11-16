@@ -1,5 +1,5 @@
 <div class="main-wrapper">
-    <div class="message-wrapper">
+    <div class="message-wrapper" [class.me]="message.me">
         <div class="options">
             <span class="logo-wrapper" (click)="proceedReply.emit('Replying')">
               <span class="iconify" data-icon="fa-solid:reply"></span>

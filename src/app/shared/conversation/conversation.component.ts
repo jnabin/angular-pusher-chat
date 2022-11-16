@@ -8,6 +8,7 @@ import { MessageService } from 'src/app/services/message.service';
 import { UploadFileService } from 'src/app/services/upload-file.service';
 import { UserService } from 'src/app/services/user.service';
 import { environment } from 'src/environments/environment';
+import { EmojiService } from '@ctrl/ngx-emoji-mart/ngx-emoji';
 
 @Component({
   selector: 'app-conversation',
@@ -143,7 +144,7 @@ export class ConversationComponent implements OnInit, AfterViewInit {
     forum.bind(`new-message-to-${this.userDetail.id}`, (data: {fromUserId: number, message: string, isGroup: boolean, groupId: number}) => {
       if(!data.isGroup) {
         this.conversations.forEach(x => {
-          if(x.id == data.fromUserId && !x.isGroup && this.opponentUserId != data.fromUserId) {
+          if(x.id == data.fromUserId && !x.isGroup) {
             x.newMessage = true;
             let user = this.users.find(x => x.id == data.fromUserId);
             x.latestMessage = data.message.length == 0 ? `${user.name} has sent file` : data.message;

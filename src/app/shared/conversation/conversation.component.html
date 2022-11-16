@@ -1,17 +1,22 @@
 <button #playAudio class="d-none" type="button" (click)="playSound()">play</button>
-<div class="user-details mb-3">
-    <strong>User Name : </strong>
-    <span>{{userDetail.name}}</span>
-    <span class="ps-5">Active Users: {{activeCount}}</span>
-    <button  mat-raised-button 
-            class="ms-5" 
-            color="primary"
-            (click)="openGroupForm(groupForm)">
-      Create Group
-    </button>
-</div>
 <div class="position-relative">
   <div class="sidebar">
+    <div class="user-details mb-3">
+      <div>
+        <strong>User Name : </strong>
+        <span>{{userDetail.name | titlecase}}</span>
+      </div>
+      <div>
+        <span><strong>Active Users : </strong> {{activeCount}}</span>
+      </div>
+      <div>
+        <button  mat-raised-button 
+        color="primary"
+        (click)="openGroupForm(groupForm)">
+        Create Group
+      </button>
+      </div>
+  </div>
     <app-chat-sidebar *ngFor="let item of conversations" 
                       [conversationItem] = "item"
                       [openUserId]="opponentUserId"
@@ -33,49 +38,14 @@
           <div class="line"></div>
         </div>
         <ng-container *ngIf="!message.isReply; else replySection;">
-          <div class="message-content">
-            <div class="image align-self-center">
-              <span class="user-title">{{message.userName[0]}}</span>
-            </div>
-            <div class="content" [ngClass]="{'gray-content': fromConversation}">
-              <div class="options">
-                <span class="logo-wrapper" (click)="replayProcess(message, 'Replying')">
-                  <span class="iconify" data-icon="fa-solid:reply"></span>
-                </span>
-                <span *ngIf="message.me && (message.fileUrl == null || message.fileUrl == '')" class="logo-wrapper" (click)="replayProcess(message, 'Editing')">
-                  <span class="iconify" data-icon="ant-design:edit-filled"></span>
-                </span>
-              </div>
-              <ng-container *ngIf="(message.fileUrl == null || message.fileUrl == '') else fileContent">
-                {{message.body}}
-              </ng-container>
-              <ng-template #fileContent>
-                <ng-container *ngIf="message.isImage">
-                  <img src="{{message.fileUrl}}" alt="" srcset="">
-                </ng-container>
-                <ng-container *ngIf="!message.isImage">
-                  <span class="me-1" style="color: #252631;">
-                    <span class="iconify" data-icon="ic:baseline-file-download"></span>
-                  </span>
-  
-                  <a href="{{message.fileUrl}}">
-                    {{message.fileUrl.slice(-28)}}
-                  </a>
-                </ng-container>
-              </ng-template>
-            </div>
-            <div class="edit-symbol" [class.last-order]="message.me" *ngIf="message.isEdited">
-              <span class="iconify" data-icon="fluent:edit-32-regular"></span>
-            </div>
-          </div>
-          <div class="time" [hidden]="i < messages.length-1 && message.me == messages[i+1].me && message.rawTime == messages[i+1].rawTime">
-            {{message.time | date:'shortTime'}}
-          </div>
-          <ng-template #rawTime>
-            <div class="time">
-              {{message.time | date:'medium'}}
-            </div>
-          </ng-template>
+          <app-direct-message-item
+          [message]="message"
+          [i]="i"
+          [messages] = "messages"
+          [fromConversation] = "fromConversation"
+          (replayProcess)="replayProcess(message, $event)"
+          >
+          </app-direct-message-item>
         </ng-container>
         <ng-template #replySection>
           <app-reply-message-item [message]="message"

@@ -1,7 +1,7 @@
 .messenger{
     display: flex;
     flex-direction: column;
-    height: calc(100vh - 112px);
+    height: calc(100vh - 20px);
     margin-left: 320px;
     gap: 20px;
     box-shadow: -7px 0px 16px rgb(0 0 0 / 10%);
@@ -115,7 +115,13 @@
   .message.me{
     align-items: flex-end;
   }
-
+.user-details{
+  display: flex;
+  gap: 10px;
+  white-space: nowrap;
+  flex-wrap: wrap;
+  justify-content: space-between;
+}
   .message.me .time{
     padding-right: 32px;
   }
@@ -131,7 +137,7 @@
 
   .messenger .body.white-bg{
     background-color: white;
-    flex-basis: calc(100vh - 120px);
+    flex-basis: calc(100vh - 20px);
   }
 
   .footer-wrapper{
@@ -140,8 +146,14 @@
     margin-bottom: 0px;
   }
 
-  .edit-symbol{
+  .edit-symbol, .react-symbol{
     order: 1;
+  }
+
+  .react-symbol{
+    align-self: flex-start;
+    font-size: 12.5px;
+    cursor: pointer;
   }
 
   .edit-symbol.last-order{
@@ -225,16 +237,16 @@
     flex-grow: 1;
   }
   
-  .emoji{
+  .footer-wrapper .emoji{
     position:absolute;
     bottom: 65px;
-    left: 0;
+    right: 0;
   }
 
   .sidebar{
     position: fixed;
     overflow-y: auto;
-    height: calc(100vh - 112px);
+    height: calc(100vh - 20px);
     width: 300px;
     z-index: 2;
   }

@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 
 @Component({
   selector: 'app-direct-message-item',
@@ -6,10 +6,20 @@ import { Component, OnInit } from '@angular/core';
   styleUrls: ['./direct-message-item.component.css']
 })
 export class DirectMessageItemComponent implements OnInit {
+  @Input() message:any;
+  @Input() i:any;
+  @Input() messages:any;
+  @Input() fromConversation:any;
+  @Input() reactEmoji:boolean = false;
 
+  @Output() replayProcess: EventEmitter<any> = new EventEmitter();
   constructor() { }
 
   ngOnInit(): void {
+  }
+
+  addEmoji(c: any){
+
   }
 
 }

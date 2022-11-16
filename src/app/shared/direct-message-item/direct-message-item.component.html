@@ -1,1 +1,56 @@
-<p>direct-message-item works!</p>
+<div class="message-content">
+    <div class="image align-self-center">
+      <span class="user-title">{{message.userName[0]}}</span>
+    </div>
+    <div class="content" [ngClass]="{'gray-content': fromConversation}">
+      <div class="options">
+        <span class="logo-wrapper" (click)="replayProcess.emit('Replying')">
+          <span class="iconify" data-icon="fa-solid:reply"></span>
+        </span>
+        <span *ngIf="message.me && (message.fileUrl == null || message.fileUrl == '')" class="logo-wrapper" (click)="replayProcess.emit('Editing')">
+          <span class="iconify" data-icon="ant-design:edit-filled"></span>
+        </span>
+      </div>
+      <ng-container *ngIf="(message.fileUrl == null || message.fileUrl == '') else fileContent">
+        {{message.body}}
+      </ng-container>
+      <ng-template #fileContent>
+        <ng-container *ngIf="message.isImage">
+          <img src="{{message.fileUrl}}" alt="" srcset="">
+        </ng-container>
+        <ng-container *ngIf="!message.isImage">
+          <span class="me-1" style="color: #252631;">
+            <span class="iconify" data-icon="ic:baseline-file-download"></span>
+          </span>
+
+          <a href="{{message.fileUrl}}">
+            {{message.fileUrl.slice(-28)}}
+          </a>
+        </ng-container>
+      </ng-template>
+    </div>
+    <div class="edit-symbol" [class.last-order]="message.me" *ngIf="message.isEdited">
+      <span class="iconify" data-icon="fluent:edit-32-regular"></span>
+    </div>
+    <div class="react-symbol" *ngIf="!message.me">
+        <span [matMenuTriggerFor]="menu">
+            <span class="iconify" data-icon="bi:emoji-smile"></span>
+        </span>
+        <mat-menu #menu="matMenu">
+            <emoji-mart
+            (emojiClick)="addEmoji($event)"
+            itle="Pick your emoji…"
+            emoji="point_up"
+            >
+            </emoji-mart>
+        </mat-menu>
+    </div>
+  </div>
+  <div class="time" [hidden]="i < messages.length-1 && message.me == messages[i+1].me && message.rawTime == messages[i+1].rawTime">
+    {{message.time | date:'shortTime'}}
+  </div>
+  <ng-template #rawTime>
+    <div class="time">
+      {{message.time | date:'medium'}}
+    </div>
+  </ng-template>

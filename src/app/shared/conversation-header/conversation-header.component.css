@@ -1,5 +1,4 @@
 .conversation-header{
-    height: 118px;
     box-shadow: 0px 4px 7px rgba(0, 0, 0, 0.15);
     padding: 15px 20px 10px 30px;
 }
@@ -19,7 +18,9 @@
 }
 
 .top-section{
-    text-align: end;
+    display: flex;
+    flex: 1;
+    justify-content: space-between;
 }
 
 .top-section .option-dropdown{
@@ -38,6 +39,7 @@
 
 .other-infos{
     display: flex;
+    align-items: center;
     justify-content: space-between;
     gap: 10px;
     margin-top: 10px;

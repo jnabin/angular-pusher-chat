@@ -12,6 +12,10 @@
     position: relative;
 }
 
+.message-wrapper .me{
+    background: linear-gradient(0deg, rgba(94, 129, 244, 0.4), rgba(94, 129, 244, 0.4)), #FFFFFF;
+}
+
 .message-wrapper .options{
     position: absolute;
     background-color: gray;
