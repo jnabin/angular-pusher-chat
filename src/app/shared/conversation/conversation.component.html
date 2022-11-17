@@ -1,6 +1,6 @@
 <button #playAudio class="d-none" type="button" (click)="playSound()">play</button>
 <div class="position-relative">
-  <div class="sidebar">
+  <div class="sidebar" *ngIf="closeConversation">
     <div class="user-details mb-3">
       <div>
         <strong>User Name : </strong>
@@ -29,7 +29,10 @@
     </app-chat-sidebar>
   </div>
   <div class="messenger" *ngIf="!closeConversation">
-    <app-conversation-header [chatTitle]="opponentChat.name"></app-conversation-header>
+    <app-conversation-header [chatTitle]="opponentChat.name"
+                              (back)="backToList()">
+
+    </app-conversation-header>
     <div #scrollMe class="body" [ngClass]="{'white-bg': fromConversation}">
       <div #messageList id="{{'message'+message.id}}" class="message" [ngClass]="{me : message.me}" *ngFor="let message of messages; let i = index">
         <div class="message-date" [hidden]="(i < messages.length-1 && message.date != messages[i+1].date) || (i > 0 && message.date == messages[i-1].date)">
@@ -68,7 +71,10 @@
         </app-reply-message>
       </div>
       <div class="footer">
-        <span id="typing-indicator"></span>
+        <span id="typing-indicator" class="d-none" style="align-items: center;">
+          <span id="tying-user-name"></span>
+          <app-typing-indicator></app-typing-indicator>
+        </span>
       <input type="file" class="d-none" #fileInput
           (change)="fileSelect($event)" />
       <emoji-mart
@@ -82,24 +88,50 @@
       <div class="inputBox" (click)="toggleEmojiPicker = false">
         <textarea placeholder="Click to start typing.." #messageInput id="textarea1" (keyup)="publishTyping()" [(ngModel)]="messageContent" (keydown)="triggerFunction($event)"></textarea>
       </div>
-      <div class="send-option align-self-center">
-        <button class="pl-0" (click)="toggleEmojiPicker = !toggleEmojiPicker">
-          <span class="iconify" data-icon="bi:emoji-smile"></span>
+      <div class="send-option">
+        <button class="pl-0 gray-color" (click)="toggleEmojiPicker = !toggleEmojiPicker">
+          <span class="iconify" data-icon="material-symbols:mood"></span>
         </button>
-        <button (click)="fileInput.click()">
-          <span (click)="toggleEmojiPicker = false" class="iconify" data-icon="gg:attachment"></span>
+        <button (click)="fileInput.click()" class="gray-color">
+          <span (click)="toggleEmojiPicker = false" class="iconify" data-icon="material-symbols:attach-file"></span>
         </button>
-        <button class="pr-0" class="send-btn" (click)="sendMessage()">
-          <span class="iconify" data-icon="fluent-mdl2:send"></span>
+        <button (click)="fileInput.click()" class="gray-color">
+          <span (click)="toggleEmojiPicker = false" class="iconify" data-icon="material-symbols:alternate-email"></span>
+        </button>
+        <button class="send-btn" (click)="sendMessage()">
+          <span>Send</span>
+          <span class="iconify" data-icon="material-symbols:send"></span>
         </button>
       </div>
+      </div>
+    </div>
+    <div class="group-members" *ngIf="opponentChat.isGroup">
+      <div class="d-flex align-items-center">
+        <span style="padding-right: 10px;">Collaborateurs</span>
+        <ng-container *ngFor="let item of opponentChat.groupUsers; let i=index;">
+          <span class="group-user-item" *ngIf="i < 3">
+            {{item.name[0]}}
+          </span>
+          <span class="group-user-item" *ngIf="i >=3">
+            {{opponentChat.groupUsers.length - i}}+
+          </span>
+        </ng-container>
+        <span class="add-members" (click)="openGroupForm(groupForm, 'update', opponentChat.groupUsers, opponentChat.name, opponentChat.id)">
+          <span class="iconify" data-icon="material-symbols:add"></span>
+        </span>
+      </div>
+      <div>
+        <span>
+          <span class="iconify" data-icon="ph:bell-ringing-fill"></span>
+        </span>
+        <span style="margin-left: 6px;">Quitter la tâche</span>
       </div>
     </div>
   </div>
 </div>
 
 <ng-template #groupForm let-data>
-  <h2 mat-dialog-title>Create Group</h2>
+  <h2 mat-dialog-title>{{data.method | titlecase}} Group</h2>
   <mat-dialog-content>
     <div class="mb-3">
       <label for="name" class="form-label">Group Name</label>
@@ -118,7 +150,8 @@
   </mat-dialog-content>
   <mat-dialog-actions>
     <button mat-button mat-dialog-close>Cancel</button>
-    <button (click)="createGroupChat()" mat-raised-button color="warn">Create</button>
+    <button *ngIf="data.method == 'create'" (click)="createGroupChat()" mat-raised-button color="warn">Create</button>
+    <button *ngIf="data.method == 'update'" (click)="updateGroup(data.gid)" mat-raised-button color="warn">Update</button>
   </mat-dialog-actions>
 </ng-template>
 

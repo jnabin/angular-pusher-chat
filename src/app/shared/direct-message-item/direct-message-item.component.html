@@ -1,4 +1,4 @@
-<div class="message-content">
+<div class="message-content" [ngClass]="{me : message.me}" >
     <div class="image align-self-center">
       <span class="user-title">{{message.userName[0]}}</span>
     </div>
@@ -34,12 +34,9 @@
         </ng-container>
       </ng-template>
     </div>
-    <div class="edit-symbol" [class.last-order]="message.me" *ngIf="message.isEdited">
-      <span class="iconify" data-icon="fluent:edit-32-regular"></span>
-    </div>
     <div class="react-symbol" *ngIf="!message.me">
-        <span [matMenuTriggerFor]="menu">
-            <span class="iconify" data-icon="bi:emoji-smile"></span>
+        <span [matMenuTriggerFor]="menu" class="reaction">
+            <span class="iconify" data-icon="material-symbols:add-reaction-outline"></span>
         </span>
         <mat-menu #menu="matMenu">
             <emoji-mart
@@ -49,6 +46,9 @@
             >
             </emoji-mart>
         </mat-menu>
+    </div>
+    <div class="edit-symbol" [class.last-order]="message.me" *ngIf="message.isEdited">
+      <span class="iconify" data-icon="fluent:edit-32-regular"></span>
     </div>
   </div>
   <div class="time" [hidden]="i < messages.length-1 && message.me == messages[i+1].me && message.rawTime == messages[i+1].rawTime">

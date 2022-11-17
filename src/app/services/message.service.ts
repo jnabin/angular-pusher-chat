@@ -45,7 +45,8 @@ export class MessageService {
       groupChatId: toGroupId,
       messageType: messageType,
       parentMessageId: parentMessageId,
-      fileUrl: fileUrl
+      fileUrl: fileUrl,
+      isGroup: isGroup
     });
   }
 

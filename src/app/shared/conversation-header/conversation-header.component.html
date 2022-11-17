@@ -1,4 +1,4 @@
-<div class="conversation-header">
+<!-- <div class="conversation-header">
     <div class="top-section">
         <div>
             <div class="chat-title-section">
@@ -44,5 +44,42 @@
                 </span>
             </div>
         </div>
+    </div>
+</div> -->
+
+<div class="conversation-header">
+    <div>
+        <span class="chat-icon" (click)="back.emit()">
+            <span class="iconify" data-icon="material-symbols:arrow-back-ios"></span>
+        </span>
+    </div>
+    <div class="chat-name">
+        <span>{{chatTitle | titlecase}}</span>
+    </div>
+    <div class="other-option">
+        <span class="option-dropdown" [matMenuTriggerFor]="otherOption">
+            <span class="iconify" data-icon="charm:menu-kebab"></span>
+        </span>
+
+        <mat-menu #otherOption="matMenu">
+            <div class="menu-header">
+                <div>Chat Options</div>
+                <div>
+                    <span class="option-dropdown">
+                        <span class="iconify" data-icon="charm:menu-kebab"></span>
+                    </span>            
+                </div>
+            </div>
+            <button class="chat-option-btn" mat-menu-item>Dolor</button>
+            <button class="chat-option-btn" mat-menu-item>Sitamet</button>
+            <button class="chat-option-btn" mat-menu-item>consectetur</button>
+            <button class="chat-option-btn" mat-menu-item>Delete all messages</button>
+            <button class="chat-option-btn" mat-menu-item class="leave-chat">
+                <span>Leave chat room</span>
+                <span class="exit">
+                    <span class="iconify" data-icon="material-symbols:logout"></span>
+                </span>
+            </button>
+        </mat-menu>
     </div>
 </div>

@@ -80,7 +80,7 @@
   font-size: 14px;
   line-height: 21px;
   color: black;
-  background: linear-gradient(0deg, rgba(244, 190, 94, 0.1), rgba(244, 190, 94, 0.1)), #FFFFFF;
+  background: linear-gradient(0deg, rgba(94, 129, 244, 0.1), rgba(94, 129, 244, 0.1)), #FFFFFF;
   min-width: 54px;
   border-radius: 18.5px 18.5px 18.5px 0px;
 }
@@ -113,21 +113,18 @@
 .content img{
   max-width: 400px;
 }
-.message.me{
-  align-items: flex-end;
-}
 
-.message.me .time{
+.message-content.me .time{
   padding-right: 32px;
 }
 
-.message.me .message-content .image{
+.message-content.me .image{
   order: 2;
 }
-.message.me .message-content .content{
+.message-content.me .content{
   color: #252631;
   border-radius: 17px 17px 0px 17px;
-  background: linear-gradient(0deg, rgba(94, 129, 244, 0.4), rgba(94, 129, 244, 0.4)), #FFFFFF;
+  background: linear-gradient(0deg, rgba(94, 129, 244, 0.2), rgba(94, 129, 244, 0.2)), #FFFFFF;
 }
 
 .messenger .body.white-bg{
@@ -270,4 +267,14 @@ ul {
 
 .reacts .react-item{
   cursor: pointer;
+}
+
+.reaction{
+  color: #5E81F4;
+  background: #FFFFFF;
+  border: 0.497706px solid #EEEEEE;
+  box-shadow: 0px 3.98165px 5.97248px rgba(0, 0, 0, 0.12), 0px 1.99083px 1.99083px rgba(0, 0, 0, 0.1);
+  border-radius: 248.853px;
+  padding: 2.97248px 5.945px;
+  font-size: 16px;
 }

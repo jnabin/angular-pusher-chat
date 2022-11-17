@@ -46,7 +46,7 @@ export class ConversationComponent implements OnInit, AfterViewInit {
   activeUserIds: string[] = [];
   expectedChatWith: any;
   //set = 'twitter';
-  opponentUserId!: number;
+  opponentUserId!: any;
   opponentChat!: any;
   users: any[] = [];
   conversations: any[] = []
@@ -92,11 +92,16 @@ export class ConversationComponent implements OnInit, AfterViewInit {
     this.userDetail = this.auth.getUser();
     this.scrollToBottom();
     this.groupService.getGroupsByUser(this.userDetail.id).subscribe(res => {
+      console.log(res);
       res.forEach(group => {
+        let fileMessage =  group.fromUserId == this.userDetail.id ? 'you sent file' : 'attachment'; 
         this.conversations.push({
           name: group.groupName,
           id: group.groupId,
-          isGroup: true
+          isGroup: true,
+          latestMessage: group.latestMessage?.length == 0 ? fileMessage : group.latestMessage,
+          time: group.timestamps,
+          groupUsers: group.users
         })
       })
     }, err => {
@@ -118,7 +123,7 @@ export class ConversationComponent implements OnInit, AfterViewInit {
       console.log(err);
     });
   
-    Pusher.logToConsole = true;
+    Pusher.logToConsole = false;
     this.pusher = new Pusher('7836396d54cdb2c2bcdd', {
       cluster: 'ap2',
       userAuthentication: {
@@ -206,6 +211,16 @@ export class ConversationComponent implements OnInit, AfterViewInit {
         //this.startPrivateChat( data.initiated_by, data.channel_name );
       }
     });
+
+    notifications.bind('remove-group-chat-request', (data: any) => {
+      if(this.opponentChat && this.opponentChat.isGroup && this.opponentChat.id == data.groupId) {
+        this.checkExistingOpenChat();
+        this.closeConversation = true;
+      }
+      let removeAbleGroup = this.conversations.find(x => x.id == data.groupId && x.isGroup);
+      let index = this.conversations.indexOf(removeAbleGroup);
+      this.conversations.splice(index, 1);
+    });
   }
 
   getCurrentTime(): string {
@@ -241,7 +256,14 @@ export class ConversationComponent implements OnInit, AfterViewInit {
       this.parentMessageId,
       fileUrl,
       this.opponentChat.isGroup).subscribe(res => {
-      this.nullMessageContent();
+        let chat = this.conversations.find((c: any) => c.id == res.conversationId && c.isGroup == res.isGroup); 
+        console.log(chat);
+        console.log(this.conversations);
+        if(chat) {
+          chat.latestMessage = res.message.length == 0 ? "you sent a file" : res.message;
+          chat.time = Date.now();
+        }
+        this.nullMessageContent();
     }, err => {
       console.log(err);
       this.nullMessageContent();
@@ -344,6 +366,7 @@ export class ConversationComponent implements OnInit, AfterViewInit {
   }
 
   publishTyping(){
+    if(!this.ChannelName) return;
     this.messageService.publishUserTyping(this.userDetail.name, this.userDetail.id, this.userDetail.id, this.opponentUserId, this.ChannelName ).subscribe(res => {
       //todo...
     }, err => {
@@ -405,11 +428,15 @@ export class ConversationComponent implements OnInit, AfterViewInit {
 
     privateChannel.bind( 'user_typing', (data: {username: string, userId: number}) => {
       if(data.userId !== this.userDetail.id) {
-        (document.getElementById('typing-indicator') as any).innerHTML = data.username + ' is typing...';
+        (document.getElementById('tying-user-name') as any).innerHTML = data.username[0].toUpperCase();
+        (document.getElementById('typing-indicator') as any).classList.remove("d-none");
+        (document.getElementById('typing-indicator') as any).classList.add("d-flex");
 
         clearTimeout(this.clearTimerId);
         this.clearTimerId = setTimeout(function () {
-          (document.getElementById('typing-indicator') as any).innerHTML = '';
+          (document.getElementById('tying-user-name') as any).innerHTML = '';
+          (document.getElementById('typing-indicator') as any).classList.add("d-none");
+          (document.getElementById('typing-indicator') as any).classList.remove("d-flex");
         }, 900);
       }
 
@@ -466,6 +493,14 @@ export class ConversationComponent implements OnInit, AfterViewInit {
   //   this.subscribeToRequestedChanel(privateChannel);
   // }
 
+  backToList(){
+    this.checkExistingOpenChat();
+    this.activeUserIds = [];
+    this.opponentUserId = null;
+    this.opponentUserId = null;
+    this.closeConversation = !this.closeConversation;
+  }
+
   openConversation(user: any) {
     user.newMessage = false;
     user.newGroup = false;
@@ -476,9 +511,6 @@ export class ConversationComponent implements OnInit, AfterViewInit {
     this.messages = [];
     this.opponentUserId = id;
     this.opponentChat = user;
-    // if (this.privateChannels.length == 0) {
-    //   this.subscribeManually(user);
-    // }
     if(this.privateChannels.find(x => x.userId == id && x.groupId == 0) != null) {
       this.subscribeToOpenedConversation(user, false);
       this.messageService.sessionMessages(this.userDetail.id, this.opponentUserId).subscribe(res => {
@@ -515,7 +547,7 @@ export class ConversationComponent implements OnInit, AfterViewInit {
       this.sessionId = null;
       let userIds: number[] = [];
       this.groupService.getUsersByGroup(this.opponentUserId).subscribe((res) => {
-        userIds = res.map(x => x.userId);
+        userIds = res.map(x => x.id);
         this.messageService.groupMessagesWithChannel(this.opponentUserId, userIds, this.userDetail.id).subscribe(res => {
           if (res) {
             res.messages.forEach(m => {
@@ -577,15 +609,26 @@ export class ConversationComponent implements OnInit, AfterViewInit {
         this.myScrollContainer.nativeElement.scrollTop = this.myScrollContainer.nativeElement.scrollHeight;
     } catch(err) {
       console.log(err);
-     }                 
+    }                 
   }
 
-  openGroupForm(template: TemplateRef<any>){
-    this.users.forEach(user => user.isSelected = false);
-    this.newGroupChat = {name: '', users: [...this.users, {name: this.userDetail.name, id: this.userDetail.id, isSelected: true, disable: true}]};
+  openGroupForm(template: TemplateRef<any>, method = 'create', users: any[] = [], name: string = '', gid = null){
+    if(users.length == 0) {
+      this.users.forEach(user => user.isSelected = false);
+      this.newGroupChat = {name: name, users: [...this.users, {name: this.userDetail.name, id: this.userDetail.id, isSelected: true, disable: true}]};
+    } else {
+      this.users.forEach(user => {
+        if(users.find(x => x.id == user.id) != null) {
+          user.isSelected = true;
+        } else {
+          user.isSelected = false;
+        }
+      });
+      this.newGroupChat = {name: name, users: [...this.users, {name: this.userDetail.name, id: this.userDetail.id, isSelected: true, disable: true}]};
+    }
     this.groupChatDialogRef = this.matDialog.open(template, {
       width: '600px',
-      data: { groupChat: this.newGroupChat },
+      data: { groupChat: this.newGroupChat, method: method, gid: gid },
     })
   }
 
@@ -610,6 +653,21 @@ export class ConversationComponent implements OnInit, AfterViewInit {
     this.sessionId = null;
     this.closeConversation = false;
     this.conversations.push({name: name, id: res, isGroup: true});
+    }, err => {
+      console.log(err);
+    });
+  }
+
+  updateGroup(gid: number){
+    const userIds = this.newGroupChat.users.filter(x => x.isSelected).map(x => x.id);
+    this.groupService.updateGroup(userIds, this.newGroupChat.name, true, gid).subscribe((res: any) => {
+      this.opponentChat.groupUsers = [];
+      this.groupService.getUsersByGroup(res.gid).subscribe((users: any[]) => {
+        users.forEach(u => this.opponentChat.groupUsers.push(u));
+      }, err => {
+        console.log(err);
+      });
+      this.groupChatDialogRef.close();
     }, err => {
       console.log(err);
     });

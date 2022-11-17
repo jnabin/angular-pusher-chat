@@ -15,9 +15,9 @@
           </div>
         <div class="current-message-detail">
             <div class="core-info">
-                <span class="sender">{{message.userName[0] | titlecase}}</span>
-                <span class="sender-name">{{message.userName | titlecase}}</span>
-                <span class="time" style="padding-left: 1px;">{{message.time | date:'shortTime'}}</span>
+                <span class="sender-name">{{message.me ? 'You' : message.userName | titlecase}}</span>
+                <span class="normal-text">Replied to</span>
+                <span class="sender-name">{{message.parentMessageUser | titlecase}}</span>
             </div>
             <div>
                 <span class="iconify" data-icon="bi:three-dots-vertical"></span>
@@ -49,23 +49,27 @@
             </div>
         </div>
         <div class="current-message-content">
+            <span class="short-text">
+              <span class="iconify" data-icon="material-symbols:short-text"></span>
+            </span>
             <ng-container *ngIf="(message.fileUrl == null || message.fileUrl == '') else fileContent">
                 {{message.body}}
               </ng-container>
-              <ng-template #fileContent>
-                <ng-container *ngIf="message.isImage">
-                  <img class="currentMessageImg" src="{{message.fileUrl}}" alt="" srcset="">
-                </ng-container>
-                <ng-container *ngIf="!message.isImage">
-                  <span class="me-1" style="color: #252631;">
-                    <span class="iconify" data-icon="ic:baseline-file-download"></span>
-                  </span>
-  
-                  <a href="{{message.fileUrl}}">
-                    {{message.fileUrl.slice(-28)}}
-                  </a>
-                </ng-container>
-              </ng-template>
+            <ng-template #fileContent>
+              <ng-container *ngIf="message.isImage">
+                <img class="currentMessageImg" src="{{message.fileUrl}}" alt="" srcset="">
+              </ng-container>
+              <ng-container *ngIf="!message.isImage">
+                <span class="me-1" style="color: #252631;">
+                  <span class="iconify" data-icon="ic:baseline-file-download"></span>
+                </span>
+
+                <a href="{{message.fileUrl}}">
+                  {{message.fileUrl.slice(-28)}}
+                </a>
+              </ng-container>
+            </ng-template>
+            <span class="time" style="padding-left: 1px;">{{message.time | date:'shortTime'}}</span>
         </div>
     </div>
     <div class="edit-symbol" [class.last-order]="message.me" *ngIf="message.isEdited">
@@ -73,8 +77,8 @@
     </div>
 
     <div class="react-symbol" *ngIf="!message.me">
-      <span [matMenuTriggerFor]="menu">
-          <span class="iconify" data-icon="bi:emoji-smile"></span>
+      <span [matMenuTriggerFor]="menu" class="reaction">
+          <span class="iconify" data-icon="material-symbols:add-reaction-outline"></span>
       </span>
       <mat-menu #menu="matMenu">
           <emoji-mart

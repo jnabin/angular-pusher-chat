@@ -12,6 +12,7 @@ import { DirectMessageItemComponent } from './direct-message-item/direct-message
 import { ReplyMessageItemComponent } from './reply-message-item/reply-message-item.component';
 import { ConversationHeaderComponent } from './conversation-header/conversation-header.component';
 import { MessageReactComponent } from './message-react/message-react.component';
+import { TypingIndicatorComponent } from './typing-indicator/typing-indicator.component';
 
 
 
@@ -24,7 +25,8 @@ import { MessageReactComponent } from './message-react/message-react.component';
     DirectMessageItemComponent,
     ReplyMessageItemComponent,
     ConversationHeaderComponent,
-    MessageReactComponent
+    MessageReactComponent,
+    TypingIndicatorComponent
   ],
   imports: [
     CommonModule,

@@ -7,13 +7,9 @@
 .message-wrapper{
     flex-grow: 1;
     padding: 10px 15px;
-    background: linear-gradient(0deg, rgba(244, 190, 94, 0.1), rgba(244, 190, 94, 0.1)), #FFFFFF;
+    background: linear-gradient(0deg, rgba(94, 129, 244, 0.1), rgba(94, 129, 244, 0.1)), #FFFFFF;
     border-radius: 12px;
     position: relative;
-}
-
-.message-wrapper .me{
-    background: linear-gradient(0deg, rgba(94, 129, 244, 0.4), rgba(94, 129, 244, 0.4)), #FFFFFF;
 }
 
 .message-wrapper .options{
@@ -47,7 +43,7 @@
   }
 
 .message-wrapper.me{
-    background: linear-gradient(0deg, rgba(94, 129, 244, 0.4), rgba(94, 129, 244, 0.4)), #FFFFFF;
+    background: linear-gradient(0deg, rgba(94, 129, 244, 0.2), rgba(94, 129, 244, 0.2)), #FFFFFF;
 }
 
 .current-message-detail{
@@ -73,29 +69,38 @@
 
 .core-info{
     display: flex;
-    gap: 10px;
-    align-items: center;
+    gap: 5px;
 }
 
 .core-info .sender-name, .reply-to-name{
-    font-weight: 900;
-    font-size: 14px;
-    line-height: 17px;
+    font-weight: 700;
+    font-size: 15px;
+    line-height: 18px;
     color: #000000;
 }
 
-.core-info .time{
+.core-info .normal-text{
+    font-weight: 400;
+    font-size: 14px;
+    line-height: 17px;
+    color: #8181A5;
+}
+
+.current-message-content .time{
     font-weight: 400;
     font-size: 12px;
     line-height: 14px;
     color: rgba(0, 0, 0, 0.6);
+    margin-left: auto;
+    align-self: flex-end;
+    white-space: nowrap;
 }
 
 .reply-to-details{
     cursor: pointer;
     margin-left: 15px;
-    margin-top: 12px;
-    margin-bottom: 12px;
+    margin-top: 15px;
+    margin-bottom: 18px;
     border-left: 4px solid rgba(0, 0, 0, 0.1);
     padding: 5px 10px;
 }
@@ -137,6 +142,8 @@
     font-size: 15px;
     line-height: 18px;
     color: #000000;
+    display: flex;
+    gap: 5px;
 }
 
 .currentMessageImg{
@@ -177,4 +184,18 @@ cursor: pointer;
   
   .reacts .react-item{
     cursor: pointer;
+  }
+
+  .reaction{
+    color: #5E81F4;
+    background: #FFFFFF;
+    border: 0.497706px solid #EEEEEE;
+    box-shadow: 0px 3.98165px 5.97248px rgba(0, 0, 0, 0.12), 0px 1.99083px 1.99083px rgba(0, 0, 0, 0.1);
+    border-radius: 248.853px;
+    padding: 2.97248px 5.945px;
+    font-size: 16px;
+  }
+
+  .short-text{
+    font-size: 17px;
   }
