@@ -3,6 +3,11 @@
       <span class="user-title">{{message.userName[0]}}</span>
     </div>
     <div class="content" [ngClass]="{'gray-content': fromConversation}">
+      <div class="reacts">
+        <div class="react-item" *ngFor="let item of message.reacts">
+          <app-message-react [react]="item"></app-message-react>
+        </div>
+      </div>
       <div class="options">
         <span class="logo-wrapper" (click)="replayProcess.emit('Replying')">
           <span class="iconify" data-icon="fa-solid:reply"></span>
@@ -38,7 +43,7 @@
         </span>
         <mat-menu #menu="matMenu">
             <emoji-mart
-            (emojiClick)="addEmoji($event)"
+            (emojiClick)="reactMessage.emit($event)"
             itle="Pick your emoji…"
             emoji="point_up"
             >

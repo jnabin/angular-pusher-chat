@@ -9,6 +9,7 @@ import { UploadFileService } from 'src/app/services/upload-file.service';
 import { UserService } from 'src/app/services/user.service';
 import { environment } from 'src/environments/environment';
 import { EmojiService } from '@ctrl/ngx-emoji-mart/ngx-emoji';
+import { ReactService } from 'src/app/services/react.service';
 
 @Component({
   selector: 'app-conversation',
@@ -73,7 +74,8 @@ export class ConversationComponent implements OnInit, AfterViewInit {
               private userService: UserService,
               private groupService: GroupService,
               private matDialog: MatDialog,
-              private uploadService: UploadFileService) { }
+              private uploadService: UploadFileService,
+              private reactService: ReactService) { }
   
   ngAfterViewInit(): void {
     this.scrollToBottom();
@@ -239,7 +241,6 @@ export class ConversationComponent implements OnInit, AfterViewInit {
       this.parentMessageId,
       fileUrl,
       this.opponentChat.isGroup).subscribe(res => {
-        console.log(res);
       this.nullMessageContent();
     }, err => {
       console.log(err);
@@ -292,6 +293,14 @@ export class ConversationComponent implements OnInit, AfterViewInit {
   addEmoji(event: any) {
     this.publishTyping();
     this.messageContent += event.emoji.native;
+  }
+
+  reactMessage(messageId: number, event: any) {
+    this.reactService.reactMessage(messageId, this.userDetail.id, this.ChannelName, event.emoji.native).subscribe(res => {
+      console.log(res);
+    }, err => {
+      console.log(err);
+    })
   }
 
   fileSelect(event: any) {
@@ -404,7 +413,25 @@ export class ConversationComponent implements OnInit, AfterViewInit {
         }, 900);
       }
 
-    } );
+    });
+
+    privateChannel.bind('react-message', (data: any) => {
+      if(data.userId == this.userDetail.id) {
+        data.userName = this.userDetail.name;
+      } else {
+        let user = this.users.find((u: any) => u.id == data.userId);
+        data.userName = user?.name;
+      }
+      this.messages.forEach(m => {
+        if(m.id == data.messageId) {
+          if(m.reacts) {
+            m.reacts.push(data);
+          } else {
+            m.reacts = [data];
+          }
+        }
+      })
+    });
 
   }
 
@@ -414,6 +441,7 @@ export class ConversationComponent implements OnInit, AfterViewInit {
     dto?.chanel.unbind("message");
     dto?.chanel.unbind("user_typing");
     dto?.chanel.unbind("edit-message");
+    dto?.chanel.unbind("react-message");
     let index = this.privateChannels.indexOf(dto);
     this.privateChannels.splice(index, 1);
   }
@@ -604,6 +632,9 @@ export class ConversationComponent implements OnInit, AfterViewInit {
     this.parentMessageId = data.id;
     this.title = title;
     this.messageInput.nativeElement.focus();
+    if(title == 'Editing') {
+      this.messageContent = data.body;
+    }
   }
 
   nullReplyMessage(){
@@ -623,7 +654,15 @@ export class ConversationComponent implements OnInit, AfterViewInit {
 
   getMessageObj(data: any, isMe: boolean, messageList: any[]) {
     let parentMessage = data.messageType == 'reply' ? messageList.find(x => x.mid == data.parentMessageId) : null;
-
+    if(data.reacts) {
+      data.reacts.forEach((r: any) => {
+        if(this.userDetail.id == r.user_id) {
+          r.userName = this.userDetail.name;
+        } else {
+          r.userName = this.users.find((u: any) => u.id == r.user_id)?.name;
+        }
+      });
+    }
     return {
       id: data.mid, 
       body: data.message, 
@@ -640,6 +679,7 @@ export class ConversationComponent implements OnInit, AfterViewInit {
       isEdited: data.isEdited == '1',
       fileUrl: data.fileUrl,
       isImage: this.isImageTypeUrl(data.fileUrl),
+      reacts : data.reacts,
       isParentImage: data.messageType == 'reply' ? this.isImageTypeUrl(parentMessage.fileUrl) : false
     };
   }

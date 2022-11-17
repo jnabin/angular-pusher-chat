@@ -11,6 +11,7 @@ import { ReplyMessageComponent } from './reply-message/reply-message.component';
 import { DirectMessageItemComponent } from './direct-message-item/direct-message-item.component';
 import { ReplyMessageItemComponent } from './reply-message-item/reply-message-item.component';
 import { ConversationHeaderComponent } from './conversation-header/conversation-header.component';
+import { MessageReactComponent } from './message-react/message-react.component';
 
 
 
@@ -22,7 +23,8 @@ import { ConversationHeaderComponent } from './conversation-header/conversation-
     ReplyMessageComponent,
     DirectMessageItemComponent,
     ReplyMessageItemComponent,
-    ConversationHeaderComponent
+    ConversationHeaderComponent,
+    MessageReactComponent
   ],
   imports: [
     CommonModule,

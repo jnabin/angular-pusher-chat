@@ -9,6 +9,7 @@ export class ReplyMessageItemComponent implements OnInit {
   @Input() message: any;
   @Output() scrollTo: EventEmitter<any> = new EventEmitter();
   @Output() proceedReply: EventEmitter<string> = new EventEmitter();
+  @Output() reactMessage: EventEmitter<any> = new EventEmitter();
   
   constructor() { }
 

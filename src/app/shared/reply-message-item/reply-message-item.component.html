@@ -1,5 +1,10 @@
 <div class="main-wrapper">
     <div class="message-wrapper" [class.me]="message.me">
+      <div class="reacts">
+        <div class="react-item" *ngFor="let item of message.reacts">
+          <app-message-react [react]="item"></app-message-react>
+        </div>
+      </div>
         <div class="options">
             <span class="logo-wrapper" (click)="proceedReply.emit('Replying')">
               <span class="iconify" data-icon="fa-solid:reply"></span>
@@ -66,4 +71,18 @@
     <div class="edit-symbol" [class.last-order]="message.me" *ngIf="message.isEdited">
         <span class="iconify" data-icon="fluent:edit-32-regular"></span>
     </div>
+
+    <div class="react-symbol" *ngIf="!message.me">
+      <span [matMenuTriggerFor]="menu">
+          <span class="iconify" data-icon="bi:emoji-smile"></span>
+      </span>
+      <mat-menu #menu="matMenu">
+          <emoji-mart
+          (emojiClick)="reactMessage.emit($event)"
+          itle="Pick your emoji…"
+          emoji="point_up"
+          >
+          </emoji-mart>
+      </mat-menu>
+  </div>
 </div>

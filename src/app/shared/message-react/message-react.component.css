@@ -1,0 +1,41 @@
+.react{
+    position: relative;
+
+}
+
+.actor-details{
+    position: absolute;
+    gap: 5px;
+    background-color: black;
+    border-radius: 10px;
+    padding: 10px;
+    color: white;
+    display: none;
+    top: -42px;
+    left: -45px;
+}
+
+.logo{
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    line-height: 20px;
+    font-size: 11px;
+    text-align: center;
+    background-color: #4D7CFE;
+    color: white;
+}
+
+.react:hover .actor-details{
+    display: flex;
+    z-index: 3;
+}
+
+.react:hover .react-icon{
+    transform: scale(1.2);
+}
+
+.react-icon{
+    transition: transform .2s; 
+}

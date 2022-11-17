@@ -10,9 +10,9 @@ export class DirectMessageItemComponent implements OnInit {
   @Input() i:any;
   @Input() messages:any;
   @Input() fromConversation:any;
-  @Input() reactEmoji:boolean = false;
 
   @Output() replayProcess: EventEmitter<any> = new EventEmitter();
+  @Output() reactMessage: EventEmitter<any> = new EventEmitter();
   constructor() { }
 
   ngOnInit(): void {

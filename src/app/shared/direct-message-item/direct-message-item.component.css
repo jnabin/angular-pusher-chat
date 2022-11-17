@@ -258,3 +258,16 @@ ul {
   padding-top: 0px !important;
   padding-bottom: 0px !important;
 }
+
+.reacts{
+  position: absolute;
+  bottom: -8px;
+  right: 0;
+  display: flex;
+  gap: 1px;
+  font-size: 14px;
+}
+
+.reacts .react-item{
+  cursor: pointer;
+}

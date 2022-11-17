@@ -44,13 +44,15 @@
           [messages] = "messages"
           [fromConversation] = "fromConversation"
           (replayProcess)="replayProcess(message, $event)"
+          (reactMessage)="reactMessage(message.id, $event)"
           >
           </app-direct-message-item>
         </ng-container>
         <ng-template #replySection>
           <app-reply-message-item [message]="message"
                                   (scrollTo)="scrollTo('message'+message.parentMessageId)"
-                                  (proceedReply)="replayProcess(message, $event)">
+                                  (proceedReply)="replayProcess(message, $event)"
+                                  (reactMessage)="reactMessage(message.id, $event)">
 
           </app-reply-message-item>
         </ng-template>
@@ -62,7 +64,7 @@
                            [replyMessage]="replyMessage"
                            [replyMessageUrl]="replyMessageUrl"
                            [title]="title"
-                           (cancel)="replying = false">
+                           (cancel)="replying = false; messageContent = ''">
         </app-reply-message>
       </div>
       <div class="footer">

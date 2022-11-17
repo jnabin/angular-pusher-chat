@@ -10,7 +10,7 @@ import { map, Observable } from 'rxjs';
 export class MessageService {
   api: string = `${environment.baseUrl}`;
 
-  constructor(private http: HttpClient, private auth: AuthService) { }
+  constructor(private http: HttpClient) { }
 
   sendMessage(fromUserId: number, 
               toChatId: number, 
